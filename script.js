@@ -215,12 +215,14 @@ function ambilModeDariServer() {
 
         .then(function(data) {
 
-            console.log(
-                "Mode dari server:",
-                data.modeOrder
-            );
+    modeOrder = data.modeOrder;
 
-        })
+    console.log(
+        "Mode dari server:",
+        modeOrder
+    );
+
+})
 
         .catch(function(error) {
 
