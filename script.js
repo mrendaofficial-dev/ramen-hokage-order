@@ -217,10 +217,12 @@ function ambilModeDariServer() {
 
     modeOrder = data.modeOrder;
 
-    console.log(
+        console.log(
         "Mode dari server:",
         modeOrder
     );
+
+    pilihLantai();
 
 })
 
@@ -991,9 +993,6 @@ fetch(URL_API, {
 });
 
 }
-
-
-pilihLantai();
 
 
 ambilModeDariServer();
