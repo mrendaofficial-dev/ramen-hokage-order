@@ -488,8 +488,41 @@ function tampilMenuGabungan() {
 
     tampilanMenu += `
         <h2 id="totalOrderGabungan">
-            TOTAL: Rp0
-        </h2>
+    TOTAL: Rp0
+</h2>
+
+<hr>
+
+<h3>DATA PELANGGAN</h3>
+
+<p>Nama Pelanggan</p>
+
+<input
+    type="text"
+    id="namaPelanggan"
+    placeholder="Masukkan nama"
+>
+
+<p>Nomor Meja</p>
+
+<input
+    type="text"
+    id="nomorMeja"
+    placeholder="Masukkan nomor meja"
+>
+
+<p>Catatan</p>
+
+<textarea
+    id="catatanPesanan"
+    placeholder="Contoh: tidak pedas, tanpa daun bawang"
+></textarea>
+
+<br><br>
+
+<button onclick="konfirmasiOrderGabungan()">
+    KONFIRMASI PESANAN
+</button>
     `;
 
     document.getElementById("menu").innerHTML =
@@ -996,3 +1029,23 @@ fetch(URL_API, {
 
 
 ambilModeDariServer();
+
+
+function konfirmasiOrderGabungan() {
+
+    let nama =
+        document.getElementById("namaPelanggan").value;
+
+    let meja =
+        document.getElementById("nomorMeja").value;
+
+    let catatan =
+        document.getElementById("catatanPesanan").value;
+
+    console.log("Nama:", nama);
+
+    console.log("Meja:", meja);
+
+    console.log("Catatan:", catatan);
+
+}
