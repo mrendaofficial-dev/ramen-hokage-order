@@ -527,6 +527,7 @@ function tampilMenuGabungan() {
 
     document.getElementById("menu").innerHTML =
         tampilanMenu;
+    hitungTotalGabungan();
 }
 
 
