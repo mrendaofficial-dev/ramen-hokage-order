@@ -445,7 +445,7 @@ function tampilMenuGabungan() {
     menuLt1.forEach(function(menu, index) {
 
         tampilanMenu += `
-            <div>
+            <div class="menu-item">
                 <h3>${menu.nama}</h3>
 
                 <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
