@@ -520,7 +520,7 @@ function tampilMenuGabungan() {
 
 <br><br>
 
-<button onclick="konfirmasiOrderGabungan()">
+<button onclick="simpanDataPemesan()">
     KONFIRMASI PESANAN
 </button>
     `;
@@ -878,8 +878,8 @@ function simpanDataPemesan() {
 
         <br>
 
-        <button onclick="tampilLantai1()">
-            ← KEMBALI
+        <button onclick="tampilMenuGabungan()">
+        ← KEMBALI
         </button>
 
         <button onclick="kirimOrder()">
@@ -1042,10 +1042,99 @@ function konfirmasiOrderGabungan() {
     let catatan =
         document.getElementById("catatanPesanan").value;
 
-    console.log("Nama:", nama);
 
-    console.log("Meja:", meja);
+    let pesananLt1 =
+        ambilPesananLt1();
 
-    console.log("Catatan:", catatan);
+    let pesananLt2 =
+        ambilPesananLt2();
+
+
+    let semuaPesanan =
+        pesananLt1.concat(pesananLt2);
+
+
+    let total =
+        0;
+
+
+    semuaPesanan.forEach(function(menu) {
+
+        total =
+            total +
+            (menu.harga * menu.jumlah);
+
+    });
+
+
+    let tampilanKonfirmasi = `
+
+        <h2>🍜 KONFIRMASI PESANAN</h2>
+
+        <hr>
+
+        <p>
+            <strong>Nama:</strong>
+            ${nama}
+        </p>
+
+        <p>
+            <strong>Nomor Meja:</strong>
+            ${meja}
+        </p>
+
+        <p>
+            <strong>Catatan:</strong>
+            ${catatan || "-"}
+        </p>
+
+        <hr>
+
+        <h3>MENU PESANAN</h3>
+
+    `;
+
+
+    semuaPesanan.forEach(function(menu) {
+
+        tampilanKonfirmasi += `
+
+            <p>
+                ${menu.nama}
+                × ${menu.jumlah}
+                = Rp${(
+                    menu.harga * menu.jumlah
+                ).toLocaleString("id-ID")}
+            </p>
+
+        `;
+
+    });
+
+
+    tampilanKonfirmasi += `
+
+        <hr>
+
+        <h2>
+            TOTAL:
+            Rp${total.toLocaleString("id-ID")}
+        </h2>
+
+        <br>
+
+        <button onclick="tampilMenuGabungan()">
+            ← KEMBALI
+        </button>
+
+        <button onclick="kirimOrder()">
+            KIRIM PESANAN
+        </button>
+
+    `;
+
+
+    document.getElementById("menu").innerHTML =
+        tampilanKonfirmasi;
 
 }
