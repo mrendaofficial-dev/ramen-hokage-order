@@ -472,7 +472,7 @@ function tampilMenuGabungan() {
                     ${jumlahMenuLt2[index]}
                 </span>
 
-                <button class="btn-kurang" onclick="ubahJumlahGabunganLt2(${index}, -1)">−</button>
+                <button class="btn-tambah" onclick="ubahJumlahGabunganLt2(${index}, -1)">−</button>
             </div>
         `;
     });
