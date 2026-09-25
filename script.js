@@ -205,36 +205,27 @@ function setLantaiPelanggan(lantai) {
 
 function ambilModeDariServer() {
 
-    fetch(URL_API)
-
+       document.getElementById("menu").innerHTML = `
+       <h2>⏳ Memuat pengaturan Ramen Hokage...</h2>
+`;    
+       fetch(URL_API)
         .then(function(response) {
-
             return response.json();
-
         })
-
         .then(function(data) {
 
-    modeOrder = data.modeOrder;
+            modeOrder = data.modeOrder;
 
-        console.log(
-        "Mode dari server:",
-        modeOrder
-    );
+            console.log("Mode dari server:", modeOrder);
 
-    pilihLantai();
-
-})
-
+            
+            pilihLantai();
+        })
         .catch(function(error) {
 
-            console.log(
-                "Gagal mengambil mode:",
-                error
-            );
+            console.log("Gagal mengambil mode:", error);
 
         });
-
 }
 
 
@@ -272,13 +263,13 @@ function tampilLantai1() {
 
                 <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
 
-                <button onclick="ubahJumlah(${index}, -1)">−</button>
+                <button class="btn-kurang" onclick="ubahJumlah(${index}, -1)">−</button>
 
                 <span id="jumlah-${index}">
                     ${jumlahMenuLt1[index]}
                 </span>
 
-                <button onclick="ubahJumlah(${index}, 1)">+</button>
+                <button class="btn-tambah" onclick="ubahJumlah(${index}, 1)">+</button>
             </div>
         `;
     });
@@ -352,18 +343,18 @@ function tampilLantai2() {
     menuLt2.forEach(function(menu, index) {
 
         tampilanMenu += `
-            <div>
-                <h3>${menu.nama}</h3>
+        <div class="menu-item">
+        <h3>${menu.nama}</h3>
 
                 <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
 
-                <button onclick="ubahJumlahLt2(${index}, -1)">−</button>
+                <button class="btn-kurang" onclick="ubahJumlahLt2(${index}, -1)">−</button>
 
                 <span id="jumlah-lt2-${index}">
                     ${jumlahMenuLt2[index]}
                 </span>
 
-                <button onclick="ubahJumlahLt2(${index}, 1)">+</button>
+                <button class="btn-tambah" onclick="ubahJumlahLt2(${index}, 1)">+</button>
             </div>
         `;
     });
@@ -450,13 +441,13 @@ function tampilMenuGabungan() {
 
                 <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
 
-                <button onclick="ubahJumlahGabunganLt1(${index}, -1)">−</button>
+                <button class="btn-kurang" onclick="ubahJumlahGabunganLt1(${index}, -1)">−</button>
 
                 <span id="jumlah-gabung-lt1-${index}">
                     ${jumlahMenuLt1[index]}
                 </span>
 
-                <button onclick="ubahJumlahGabunganLt1(${index}, 1)">+</button>
+                <button class="btn-tambah" onclick="ubahJumlahGabunganLt1(${index}, 1)">+</button>
             </div>
         `;
     });
@@ -475,13 +466,13 @@ function tampilMenuGabungan() {
 
                 <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
 
-                <button onclick="ubahJumlahGabunganLt2(${index}, -1)">−</button>
+                <button class="btn-kurang" onclick="ubahJumlahGabunganLt2(${index}, -1)">−</button>
 
                 <span id="jumlah-gabung-lt2-${index}">
                     ${jumlahMenuLt2[index]}
                 </span>
 
-                <button onclick="ubahJumlahGabunganLt2(${index}, 1)">+</button>
+                <button class="btn-kurang" onclick="ubahJumlahGabunganLt2(${index}, -1)">−</button>
             </div>
         `;
     });
