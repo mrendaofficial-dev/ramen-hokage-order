@@ -493,15 +493,6 @@ tampilanMenu += `
     </div>
 `;
 
-tampilanMenu += `
-    <div id="keranjangGabungan">
-
-        <h2>🛒 PESANAN ANDA</h2>
-
-        <div id="daftarPesananGabungan"></div>
-
-    </div>
-`;
 
 tampilanMenu += `
     <hr>
