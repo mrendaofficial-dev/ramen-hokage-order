@@ -529,8 +529,11 @@ tampilanMenu += `
     </button>
 `;
     document.getElementById("menu").innerHTML =
-        tampilanMenu;
-    hitungTotalGabungan();
+    tampilanMenu;
+
+hitungTotalGabungan();
+
+tampilkanKeranjangGabungan();
 }
 
 
@@ -552,6 +555,8 @@ function ubahJumlahGabunganLt1(index, perubahan) {
 
     hitungTotalGabungan();
 
+    tampilkanKeranjangGabungan();
+
 }
 
 
@@ -572,6 +577,8 @@ function ubahJumlahGabunganLt2(index, perubahan) {
         jumlahMenuLt2[index];
 
     hitungTotalGabungan();
+
+    tampilkanKeranjangGabungan();
 
 }
 
@@ -599,6 +606,41 @@ function hitungTotalGabungan() {
     document.getElementById("totalOrderGabungan").innerHTML =
         "TOTAL: Rp" +
         total.toLocaleString("id-ID");
+
+}
+
+
+function tampilkanKeranjangGabungan() {
+
+    let pesananLt1 =
+        ambilPesananLt1();
+
+    let pesananLt2 =
+        ambilPesananLt2();
+
+    let semuaPesanan =
+        pesananLt1.concat(pesananLt2);
+
+    let daftar = "";
+
+    semuaPesanan.forEach(function(menu) {
+
+        daftar += `
+            <p>
+                <strong>${menu.nama}</strong>
+                <br>
+                ${menu.jumlah} ×
+                Rp${menu.harga.toLocaleString("id-ID")}
+                =
+                Rp${menu.subtotal.toLocaleString("id-ID")}
+            </p>
+        `;
+
+    });
+
+    document.getElementById(
+        "daftarPesananGabungan"
+    ).innerHTML = daftar;
 
 }
 
