@@ -481,41 +481,62 @@ function tampilMenuGabungan() {
         <h2 id="totalOrderGabungan">
     TOTAL: Rp0
 </h2>
+`;
 
-<hr>
+tampilanMenu += `
+    <div id="keranjangGabungan">
 
-<h3>DATA PELANGGAN</h3>
+        <h2>🛒 PESANAN ANDA</h2>
 
-<p>Nama Pelanggan</p>
+        <div id="daftarPesananGabungan"></div>
 
-<input
-    type="text"
-    id="namaPelanggan"
-    placeholder="Masukkan nama"
->
+    </div>
+`;
 
-<p>Nomor Meja</p>
+tampilanMenu += `
+    <div id="keranjangGabungan">
 
-<input
-    type="text"
-    id="nomorMeja"
-    placeholder="Masukkan nomor meja"
->
+        <h2>🛒 PESANAN ANDA</h2>
 
-<p>Catatan</p>
+        <div id="daftarPesananGabungan"></div>
 
-<textarea
-    id="catatanPesanan"
-    placeholder="Contoh: tidak pedas, tanpa daun bawang"
-></textarea>
+    </div>
+`;
 
-<br><br>
+tampilanMenu += `
+    <hr>
 
-<button onclick="simpanDataPemesan()">
-    KONFIRMASI PESANAN
-</button>
-    `;
+    <h3>DATA PELANGGAN</h3>
 
+    <p>Nama Pelanggan</p>
+
+    <input
+        type="text"
+        id="namaPelanggan"
+        placeholder="Masukkan nama"
+    >
+
+    <p>Nomor Meja</p>
+
+    <input
+        type="text"
+        id="nomorMeja"
+        placeholder="Masukkan nomor meja"
+    >
+
+    <p>Catatan</p>
+
+    <textarea
+        id="catatanPesanan"
+        placeholder="Contoh: tidak pedas, tanpa daun bawang"
+    ></textarea>
+
+    <br><br>
+
+    <button onclick="simpanDataPemesan()">
+        KONFIRMASI PESANAN
+    </button>
+`;
     document.getElementById("menu").innerHTML =
         tampilanMenu;
     hitungTotalGabungan();
