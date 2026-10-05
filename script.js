@@ -250,9 +250,11 @@ function tampilLantai1() {
     let tampilanMenu = `
         <h2>🍜 MENU RAMEN HOKAGE LT. 1</h2>
 
+        <div>
         <button onclick="resetPesanan(); pilihLantai()">
-    ← GANTI LANTAI
-</button>
+        ← GANTI LANTAI
+        </button>
+        <div>
     `;
 
     menuLt1.forEach(function(menu, index) {
@@ -335,9 +337,11 @@ function tampilLantai2() {
     let tampilanMenu = `
         <h2>🍜 MENU RAMEN HOKAGE LT. 2</h2>
 
+        <div>
         <button onclick="resetPesanan(); pilihLantai()">
-    ← GANTI LANTAI
-</button>
+        ← GANTI LANTAI
+        </button>
+        <div>
     `;
 
     menuLt2.forEach(function(menu, index) {
