@@ -1049,16 +1049,42 @@ fetch(URL_API, {
         "Permintaan order sudah dikirim ke Google Sheets."
     );
 
-    alert(
-        "ORDER BERHASIL DIKIRIM!\n\n" +
-        "Nomor Order: " + nomorOrder + "\n" +
-        "Nama: " + dataNama + "\n" +
-        "Meja: " + dataMeja + "\n" +
-        "Total: Rp" +
-        total.toLocaleString("id-ID") +
-        "\n\n" +
-        "Terima kasih sudah memesan di Ramen Hokage!"
-    );
+    document.getElementById("menu").innerHTML = `
+    <div id="orderBerhasil">
+
+        <h2>✅ ORDER BERHASIL DIKIRIM!</h2>
+
+        <p>
+            Nomor Order:
+            <strong>${nomorOrder}</strong>
+        </p>
+
+        <p>
+            Nama:
+            <strong>${dataNama}</strong>
+        </p>
+
+        <p>
+            Meja:
+            <strong>${dataMeja}</strong>
+        </p>
+
+        <h2>
+            TOTAL: Rp${total.toLocaleString("id-ID")}
+        </h2>
+
+        <p>
+            Terima kasih sudah memesan di Ramen Hokage!
+        </p>
+
+        <button
+            class="btn-pesan-lagi"
+            onclick="pesanLagi()">
+            🍜 PESAN LAGI
+        </button>
+
+    </div>
+`;
 
 })
 .catch(function(error) {
@@ -1077,6 +1103,17 @@ fetch(URL_API, {
 
 }
 
+
+function pesanLagi() {
+
+    resetPesanan();
+
+    dataNama = "";
+    dataMeja = "";
+    dataCatatan = "";
+
+    pilihLantai();
+}
 
 ambilModeDariServer();
 
