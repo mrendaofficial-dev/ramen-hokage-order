@@ -12,6 +12,22 @@ h1 {
 }
 
 
+button {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 18px;
+    border: 1px solid #666;
+    border-radius: 8px;
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #444;
+}
+
+
 .menu-item {
     display: inline-block;
     box-sizing: border-box;
