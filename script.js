@@ -928,6 +928,16 @@ function simpanDataPemesan() {
         return;
     }
 
+    let pesananLt1 = ambilPesananLt1();
+    let pesananLt2 = ambilPesananLt2();
+
+    if (pesananLt1.length === 0 && pesananLt2.length === 0) {
+
+        alert("Silakan pilih minimal 1 menu terlebih dahulu!");
+
+        return;
+    }
+
 
     dataNama = nama;
 
