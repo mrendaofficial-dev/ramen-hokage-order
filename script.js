@@ -882,6 +882,33 @@ function tampilkanKeranjang() {
 }
 
 
+function kembaliKeMenu() {
+
+    let mode = cekModeOrder();
+
+    if (mode === "GABUNGAN") {
+
+        tampilMenuGabungan();
+
+    } else if (mode === "KUNCI_LANTAI") {
+
+        if (lantaiPelanggan === "LT. 1") {
+
+            tampilLantai1();
+
+        } else if (lantaiPelanggan === "LT. 2") {
+
+            tampilLantai2();
+
+        } else {
+
+            pilihLantai();
+
+        }
+    }
+}
+
+
 function simpanDataPemesan() {
 
     let nama =
@@ -928,7 +955,7 @@ function simpanDataPemesan() {
 
         <br>
 
-        <button onclick="tampilMenuGabungan()">
+        <button onclick="kembaliKeMenu()">
         ← KEMBALI
         </button>
 
