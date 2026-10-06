@@ -932,8 +932,8 @@ function simpanDataPemesan() {
         ← KEMBALI
         </button>
 
-        <button onclick="kirimOrder()">
-            KIRIM ORDER
+        <button class="btn-kirim-order" onclick="kirimOrder()">
+        KIRIM ORDER
         </button>
     `;
 

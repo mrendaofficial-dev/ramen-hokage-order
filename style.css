@@ -206,20 +206,14 @@ button:hover {
     text-align: center;
 }
 
-/* TOMBOL KONFIRMASI */
-#menu button[onclick*="kirimOrder"] {
-    background-color: #f5c400;
-    color: black;
-    border: 1px solid #f5c400;
+/* TOMBOL KIRIM ORDER */
+.btn-kirim-order {
+    background-color: #f5c400 !important;
+    color: black !important;
+    border: 1px solid #f5c400 !important;
     font-weight: bold;
 }
 
-#menu button[onclick*="kirimOrder"]:hover {
-    background-color: #ffd633;
-}
-
-#menu button[onclick*="tampilMenuGabungan"] {
-    background-color: #333;
-    color: white;
-    font-weight: bold;
+.btn-kirim-order:hover {
+    background-color: #ffd633 !important;
 }
