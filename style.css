@@ -59,6 +59,17 @@ button:hover {
     font-weight: bold;
 }
 
+#totalOrder,
+#totalOrderLt2,
+#totalOrderGabungan,
+#konfirmasiTotal {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #f5c400;
+    margin: 25px 0;
+}
+
 @media (max-width: 600px) {
     .menu-item {
         width: 100%;
