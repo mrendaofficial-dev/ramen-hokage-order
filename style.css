@@ -70,6 +70,33 @@ button:hover {
     margin: 25px 0;
 }
 
+#keranjang,
+#keranjangLt2,
+#keranjangGabungan {
+    background-color: #111;
+    border: 1px solid #444;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin: 20px auto;
+    max-width: 800px;
+}
+
+#keranjang h2,
+#keranjangLt2 h2,
+#keranjangGabungan h2 {
+    text-align: center;
+    color: #f5c400;
+    margin-top: 5px;
+}
+
+#daftarPesanan p,
+#daftarPesananLt2 p,
+#daftarPesananGabungan p {
+    border-bottom: 1px solid #333;
+    padding: 8px 0;
+    margin: 0;
+}
+
 @media (max-width: 600px) {
     .menu-item {
         width: 100%;
