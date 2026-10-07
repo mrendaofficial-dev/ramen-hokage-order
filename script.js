@@ -420,7 +420,12 @@ tampilanMenu += `
 `;
 
     document.getElementById("menu").innerHTML =
-        tampilanMenu;
+    tampilanMenu;
+
+hitungTotalLt2();
+
+tampilkanKeranjangLt2();
+
 }
 
 
