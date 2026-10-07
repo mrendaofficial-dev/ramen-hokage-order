@@ -329,6 +329,11 @@ function tampilLantai1() {
     
 
 document.getElementById("menu").innerHTML = tampilanMenu;
+
+hitungTotal();
+
+tampilkanKeranjang();
+
 }
 
 
