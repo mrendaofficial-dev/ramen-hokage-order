@@ -157,8 +157,6 @@ function pilihLantai() {
 
     document.getElementById("menu").innerHTML = `
 
-        <h2>🍜 RAMEN HOKAGE</h2>
-
         <h3>ANDA DUDUK DI LANTAI?</h3>
 
         <button onclick="setLantaiPelanggan('LT. 1')">
