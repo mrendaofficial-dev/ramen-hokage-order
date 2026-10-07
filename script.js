@@ -509,39 +509,42 @@ tampilanMenu += `
 
 
 tampilanMenu += `
-    <hr>
+    <div id="dataPemesan">
 
-    <h3>DATA PELANGGAN</h3>
+        <h2>👤 DATA PEMESAN</h2>
 
-    <p>Nama Pelanggan</p>
+        <p>Nama Pelanggan</p>
 
-    <input
-        type="text"
-        id="namaPelanggan"
-        placeholder="Masukkan nama"
-    >
+        <input
+            type="text"
+            id="namaPelanggan"
+            placeholder="Masukkan nama"
+        >
 
-    <p>Nomor Meja</p>
+        <p>Nomor Meja</p>
 
-    <input
-        type="text"
-        id="nomorMeja"
-        placeholder="Masukkan nomor meja"
-    >
+        <input
+            type="text"
+            id="nomorMeja"
+            placeholder="Contoh: 05"
+        >
 
-    <p>Catatan</p>
+        <p>Catatan</p>
 
-    <textarea
-        id="catatanPesanan"
-        placeholder="Contoh: tidak pedas, tanpa daun bawang"
-    ></textarea>
+        <textarea
+            id="catatanPesanan"
+            placeholder="Contoh: Tidak pedas"
+        ></textarea>
 
-    <br><br>
+        <br><br>
 
-    <button onclick="simpanDataPemesan()">
-        KONFIRMASI PESANAN
-    </button>
+        <button onclick="simpanDataPemesan()">
+            LANJUT
+        </button>
+
+    </div>
 `;
+
     document.getElementById("menu").innerHTML =
     tampilanMenu;
 
