@@ -430,20 +430,18 @@ tampilkanKeranjangLt2();
 function tampilMenuGabungan() {
 
     let tampilanMenu = `
-        <h2>🍜 MENU RAMEN HOKAGE</h2>
+    <p class="mode-gabungan">
+        MODE GABUNGAN
+    </p>
 
-        <p>
-            <strong>MODE GABUNGAN</strong>
-        </p>
+    <button onclick="pilihLantai()">
+        ← GANTI LANTAI
+    </button>
 
-        <button onclick="pilihLantai()">
-            ← GANTI LANTAI
-        </button>
+    <hr>
 
-        <hr>
-
-        <h2>🍜 MENU LT. 1</h2>
-    `;
+    <h2>🍜 MENU LT. 1</h2>
+`;
 
     menuLt1.forEach(function(menu, index) {
 
