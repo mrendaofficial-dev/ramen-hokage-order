@@ -427,3 +427,36 @@ button[onclick*="pilihLantai"]:hover {
 #menu > p strong {
     color: #f5c400;
 }
+
+/* DATA PELANGGAN DI KONFIRMASI */
+
+.data-konfirmasi {
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.data-baris {
+    display: grid;
+    grid-template-columns: 150px 25px 1fr;
+
+    margin: 14px 0;
+
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+.data-label {
+    color: white;
+    font-weight: bold;
+}
+
+.data-titikdua {
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
+.data-nilai {
+    color: #f5c400;
+    font-weight: bold;
+}

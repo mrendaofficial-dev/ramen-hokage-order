@@ -958,13 +958,29 @@ function simpanDataPemesan() {
     let konfirmasi = `
         <h2>🧾 KONFIRMASI PESANAN</h2>
 
-        <p><strong>Nama:</strong> ${nama}</p>
+        <div class="data-konfirmasi">
 
-        <p><strong>Nomor Meja:</strong> ${meja}</p>
+    <div class="data-baris">
+        <span class="data-label">Nama</span>
+        <span class="data-titikdua">:</span>
+        <span class="data-nilai">${nama}</span>
+    </div>
 
-        <p><strong>Catatan:</strong> ${catatan}</p>
+    <div class="data-baris">
+        <span class="data-label">Nomor Meja</span>
+        <span class="data-titikdua">:</span>
+        <span class="data-nilai">${meja}</span>
+    </div>
 
-        <hr>
+    <div class="data-baris">
+        <span class="data-label">Catatan</span>
+        <span class="data-titikdua">:</span>
+        <span class="data-nilai">${catatan}</span>
+    </div>
+
+</div>
+
+<hr>
 
         <h3>🛒 PESANAN</h3>
 
