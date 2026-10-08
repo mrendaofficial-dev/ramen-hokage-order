@@ -368,3 +368,33 @@ button[onclick*="pilihLantai"]:hover {
     font-size: 16px;
     font-weight: bold;
 }
+
+/* TOMBOL LANJUT DATA PEMESAN */
+#dataPemesan button[onclick*="simpanDataPemesan"] {
+    display: block;
+
+    width: 100%;
+    max-width: 350px;
+
+    margin: 20px auto 5px auto;
+
+    padding: 14px 20px;
+
+    background-color: #f5c400;
+    color: black;
+
+    border: 1px solid #f5c400;
+    border-radius: 10px;
+
+    font-size: 18px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+#dataPemesan button[onclick*="simpanDataPemesan"]:hover {
+    background-color: #ffd633;
+    transform: translateY(-2px);
+}
