@@ -434,10 +434,6 @@ function tampilMenuGabungan() {
         MODE GABUNGAN
     </p>
 
-    <button onclick="pilihLantai()">
-        ← GANTI LANTAI
-    </button>
-
     <hr>
 
     <h2>🍜 MENU LT. 1</h2>
