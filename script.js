@@ -206,12 +206,17 @@ function ambilModeDariServer() {
        console.time("Waktu memuat pengaturan");
        document.getElementById("menu").innerHTML = `
        <h2>⏳ Memuat pengaturan Ramen Hokage...</h2>
-`;    
+`;  
+       console.time("waktu respons server");  
+       
        fetch(URL_API)
         .then(function(response) {
             return response.json();
         })
+
         .then(function(data) {
+
+            console.timeEnd("waktu respons server");
 
             modeOrder = data.modeOrder;
 
