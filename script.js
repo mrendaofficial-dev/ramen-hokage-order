@@ -203,6 +203,7 @@ function setLantaiPelanggan(lantai) {
 
 function ambilModeDariServer() {
 
+       console.time("Waktu memuat pengaturan");
        document.getElementById("menu").innerHTML = `
        <h2>⏳ Memuat pengaturan Ramen Hokage...</h2>
 `;    
@@ -216,7 +217,8 @@ function ambilModeDariServer() {
 
             console.log("Mode dari server:", modeOrder);
 
-            
+            console.timeEnd("Waktu memuat pengaturan");
+
             pilihLantai();
         })
         .catch(function(error) {
