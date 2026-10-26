@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir Ramen Hokage</title>
+    <link rel="stylesheet" href="kasir.css?v=1">
+</head>
+<body>
+
+    <header class="header">
+        <h1>🍜 RAMEN HOKAGE</h1>
+        <h2>DASHBOARD KASIR</h2>
+        <p id="statusKoneksi">Menghubungkan ke server...</p>
+    </header>
+
+    <main>
+        <div class="toolbar">
+            <button id="btnSuara" onclick="aktifkanSuara()">
+                🔔 AKTIFKAN SUARA
+            </button>
+            <button onclick="ambilPesanan(true)">
+                🔄 SEGARKAN
+            </button>
+        </div>
+
+        <section class="ringkasan">
+            <div class="kotak">
+                <span>ORDER BARU</span>
+                <strong id="jumlahBaru">0</strong>
+            </div>
+            <div class="kotak">
+                <span>DIPROSES</span>
+                <strong id="jumlahProses">0</strong>
+            </div>
+            <div class="kotak">
+                <span>SELESAI</span>
+                <strong id="jumlahSelesai">0</strong>
+            </div>
+        </section>
+
+        <h2>📋 DAFTAR PESANAN</h2>
+        <div id="daftarPesanan">
+            <p>Memuat pesanan...</p>
+        </div>
+    </main>
+
+    <script src="kasir.js?v=1"></script>
+</body>
+</html>
