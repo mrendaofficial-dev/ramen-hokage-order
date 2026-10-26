@@ -1,0 +1,133 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    padding: 20px;
+    text-align: center;
+    background: #222;
+    border-bottom: 3px solid #ffcc00;
+}
+
+.header h1 {
+    color: #ffcc00;
+    margin: 0 0 8px;
+}
+
+.header h2 {
+    margin: 0;
+}
+
+#statusKoneksi {
+    color: #ccc;
+    font-size: 14px;
+}
+
+main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 16px;
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+button {
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #ffcc00;
+    color: #111;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.ringkasan {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.kotak {
+    padding: 16px 8px;
+    border: 1px solid #444;
+    border-radius: 10px;
+    background: #222;
+    text-align: center;
+}
+
+.kotak span {
+    display: block;
+    font-size: 12px;
+    color: #ffcc00;
+}
+
+.kotak strong {
+    display: block;
+    margin-top: 8px;
+    font-size: 28px;
+}
+
+.order {
+    background: #222;
+    border: 1px solid #555;
+    border-left: 5px solid #ffcc00;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 14px;
+    overflow-wrap: anywhere;
+}
+
+.order.baru {
+    border-left-color: #ffcc00;
+}
+
+.order.proses {
+    border-left-color: #2196f3;
+}
+
+.order.selesai {
+    border-left-color: #4caf50;
+    opacity: 0.8;
+}
+
+.order h3 {
+    margin-top: 0;
+    color: #ffcc00;
+}
+
+.total {
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 12px;
+}
+
+.catatan {
+    color: #ffcc00;
+}
+
+@media (min-width: 700px) {
+    #daftarPesanan {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        align-items: start;
+    }
+
+    .order {
+        margin-bottom: 0;
+    }
+}
