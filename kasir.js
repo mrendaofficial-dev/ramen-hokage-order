@@ -8,7 +8,9 @@ let orderAwalSudahDibaca = false;
 let daftarIDSebelumnya = new Set();
 
 function rupiah(nilai) {
-    return "Rp" + Number(nilai || 0).toLocaleString("id-ID");
+    return "Rp" + Number(
+        String(nilai || 0).replace(/[^\d-]/g, "")
+    ).toLocaleString("id-ID");
 }
 
 function aman(teks) {
@@ -70,47 +72,66 @@ function bunyikanAlarm() {
     });
 }
 
-function normalisasiStatus(status) {
-    const s = String(status || "").trim().toUpperCase();
+function statusPembayaran(order) {
+    const status = String(order.statusPembayaran || "")
+        .trim()
+        .toUpperCase();
 
-    if (s === "SELESAI") return "selesai";
-    if (s === "DIPROSES") return "proses";
+    if (status === "LUNAS") return "LUNAS";
+    if (status === "BELUM BAYAR") return "BELUM BAYAR";
 
-    return "baru";
+    // Data lama yang belum memiliki status pembayaran
+    return "BELUM DIVERIFIKASI";
 }
 
 function tampilkanPesanan(pesanan) {
     const daftar = document.getElementById("daftarPesanan");
 
-    let jumlahBaru = 0;
-    let jumlahProses = 0;
-    let jumlahSelesai = 0;
-
-    pesanan.slice().reverse().forEach(function(order) {
-        const status = normalisasiStatus(order.statusOrder);
-
-        if (status === "baru") jumlahBaru++;
-        if (status === "proses") jumlahProses++;
-        if (status === "selesai") jumlahSelesai++;
+    // Tagihan lunas tidak ditampilkan di daftar aktif.
+    // Status pembayaran kosong tidak otomatis dianggap belum bayar.
+    const tagihanAktif = pesanan.filter(function(order) {
+        return statusPembayaran(order) !== "LUNAS";
     });
+
+    const jumlahBaru = tagihanAktif.filter(function(order) {
+        return String(order.statusOrder || "").trim().toUpperCase() === "BARU";
+    }).length;
+
+    const jumlahProses = tagihanAktif.filter(function(order) {
+        return String(order.statusOrder || "").trim().toUpperCase() === "DIPROSES";
+    }).length;
+
+    const jumlahSelesai = tagihanAktif.filter(function(order) {
+        return String(order.statusOrder || "").trim().toUpperCase() === "SELESAI";
+    }).length;
 
     document.getElementById("jumlahBaru").textContent = jumlahBaru;
     document.getElementById("jumlahProses").textContent = jumlahProses;
     document.getElementById("jumlahSelesai").textContent = jumlahSelesai;
 
-    if (!pesanan.length) {
-        daftar.innerHTML = "<p>Belum ada pesanan.</p>";
+    if (tagihanAktif.length === 0) {
+        daftar.innerHTML = "<p>Tidak ada tagihan aktif.</p>";
         return;
     }
 
-    daftar.innerHTML = pesanan.slice().reverse().map(function(order) {
-        const status = normalisasiStatus(order.statusOrder);
+    daftar.innerHTML = tagihanAktif.slice().reverse().map(function(order) {
+        const statusOrder = String(order.statusOrder || "")
+            .trim().toUpperCase();
+
+        const statusBayar = statusPembayaran(order);
+
+        const kelas = statusOrder === "DIPROSES"
+            ? "proses"
+            : statusOrder === "SELESAI"
+                ? "selesai"
+                : "baru";
 
         return `
-            <article class="order ${status}">
+            <article class="order ${kelas}">
                 <h3>${aman(order.nomorOrder)}</h3>
-                <p><b>Status:</b> ${aman(order.statusOrder)}</p>
-                <p><b>Waktu:</b> ${aman(order.waktu)}</p>
+                <p><b>Status pesanan:</b> ${aman(statusOrder || "-")}</p>
+                <p><b>Status pembayaran:</b> ${aman(statusBayar)}</p>
+                <p><b>Waktu order:</b> ${aman(order.waktu)}</p>
                 <p><b>Nama:</b> ${aman(order.nama)}</p>
                 <p><b>Lantai:</b> ${aman(order.lantai)}
                    · <b>Meja:</b> ${aman(order.meja)}</p>
@@ -119,12 +140,14 @@ function tampilkanPesanan(pesanan) {
                 <p class="catatan"><b>Catatan:</b>
                    ${aman(order.catatan || "-")}</p>
                 <p class="total">${rupiah(order.total)}</p>
+                <p><b>Metode pembayaran:</b>
+                   ${aman(order.metodePembayaran || "-")}</p>
             </article>
         `;
     }).join("");
 }
 
-async function ambilPesanan(tampilkanPesan) {
+async function ambilPesanan() {
     const statusEl = document.getElementById("statusKoneksi");
 
     try {
@@ -157,8 +180,7 @@ async function ambilPesanan(tampilkanPesan) {
 
         if (orderAwalSudahDibaca) {
             const adaOrderBaru = pesanan.some(function(order) {
-                const id = String(order.nomorOrder);
-                return !daftarIDSebelumnya.has(id);
+                return !daftarIDSebelumnya.has(String(order.nomorOrder));
             });
 
             if (adaOrderBaru) {
@@ -186,7 +208,8 @@ async function ambilPesanan(tampilkanPesan) {
     }
 }
 
-ambilPesanan(false);
+ambilPesanan();
+
 setInterval(function() {
-    ambilPesanan(false);
+    ambilPesanan();
 }, 7000);
