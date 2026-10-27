@@ -352,8 +352,6 @@ try {
         : "⚠️ Server tidak dapat diakses dan belum ada order tersimpan.";
 }
 
-}
-
 ambilPesanan();
 
 setInterval(function() {
