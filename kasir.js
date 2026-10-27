@@ -84,11 +84,10 @@ function statusPembayaran(order) {
     return "BELUM DIVERIFIKASI";
 }
 
+
 function tampilkanPesanan(pesanan) {
     const daftar = document.getElementById("daftarPesanan");
 
-    // Tagihan lunas tidak ditampilkan di daftar aktif.
-    // Status pembayaran kosong tidak otomatis dianggap belum bayar.
     const tagihanAktif = pesanan.filter(function(order) {
         return statusPembayaran(order) !== "LUNAS";
     });
@@ -115,11 +114,9 @@ function tampilkanPesanan(pesanan) {
     }
 
     daftar.innerHTML = tagihanAktif.slice().reverse().map(function(order) {
-        const statusOrder = String(order.statusOrder || "")
-            .trim().toUpperCase();
-
+        const nomor = String(order.nomorOrder || "");
+        const statusOrder = String(order.statusOrder || "").trim().toUpperCase();
         const statusBayar = statusPembayaran(order);
-
         const kelas = statusOrder === "DIPROSES"
             ? "proses"
             : statusOrder === "SELESAI"
@@ -128,25 +125,113 @@ function tampilkanPesanan(pesanan) {
 
         return `
             <article class="order ${kelas}">
-                <h3>${aman(order.nomorOrder)}</h3>
+                <h3>${aman(nomor)}</h3>
                 <p><b>Status pesanan:</b> ${aman(statusOrder || "-")}</p>
                 <p><b>Status pembayaran:</b> ${aman(statusBayar)}</p>
                 <p><b>Waktu order:</b> ${aman(order.waktu)}</p>
                 <p><b>Nama:</b> ${aman(order.nama)}</p>
                 <p><b>Lantai:</b> ${aman(order.lantai)}
                    · <b>Meja:</b> ${aman(order.meja)}</p>
-                <p><b>Pesanan:</b><br>
-                   ${aman(order.daftarPesanan || "-")}</p>
-                <p class="catatan"><b>Catatan:</b>
-                   ${aman(order.catatan || "-")}</p>
+                <p><b>Pesanan:</b><br>${aman(order.daftarPesanan || "-")}</p>
+                <p class="catatan"><b>Catatan:</b> ${aman(order.catatan || "-")}</p>
                 <p class="total">${rupiah(order.total)}</p>
-                <p><b>Metode pembayaran:</b>
-                   ${aman(order.metodePembayaran || "-")}</p>
+                <p><b>Metode pembayaran:</b> ${aman(order.metodePembayaran || "-")}</p>
+                <button type="button"
+                    onclick="bukaFormPembayaran('${aman(nomor)}', ${Number(order.total) || 0})">
+                    💳 PROSES PEMBAYARAN
+                </button>
             </article>
         `;
     }).join("");
 }
 
+function bukaFormPembayaran(nomorOrder, total) {
+    const pilihan = prompt(
+        "Pembayaran order " + nomorOrder +
+        "\nTagihan: " + rupiah(total) +
+        "\n\nKetik TUNAI atau QRIS:"
+    );
+
+    if (!pilihan) return;
+
+    const metode = pilihan.trim().toUpperCase();
+
+    if (metode !== "TUNAI" && metode !== "QRIS") {
+        alert("Pilih TUNAI atau QRIS.");
+        return;
+    }
+
+    let uangDibayar = 0;
+
+    if (metode === "TUNAI") {
+        const masukan = prompt(
+            "Tagihan: " + rupiah(total) +
+            "\nMasukkan uang yang diterima:"
+        );
+
+        if (masukan === null) return;
+
+        uangDibayar = Number(masukan.replace(/[^\d]/g, ""));
+
+        if (!Number.isFinite(uangDibayar) || uangDibayar < total) {
+            alert("Uang yang diterima kurang dari tagihan atau tidak valid.");
+            return;
+        }
+
+        alert(
+            "Tagihan: " + rupiah(total) +
+            "\nUang diterima: " + rupiah(uangDibayar) +
+            "\nKembalian: " + rupiah(uangDibayar - total)
+        );
+    } else {
+        const yakin = confirm(
+            "Pastikan pembayaran QRIS sudah masuk melalui sistem QRIS kawan.\n\n" +
+            "Apakah pembayaran sudah terverifikasi?"
+        );
+
+        if (!yakin) return;
+    }
+
+    const petugas = prompt("Nama petugas kasir:", "Kasir");
+
+    if (petugas === null || !petugas.trim()) return;
+
+    const lanjut = confirm(
+        "Konfirmasi pembayaran order " + nomorOrder +
+        " dengan metode " + metode + "?"
+    );
+
+    if (!lanjut) return;
+
+    prosesPembayaran({
+        nomorOrder: nomorOrder,
+        metode: metode,
+        petugas: petugas.trim(),
+        uangDibayar: uangDibayar
+    });
+}
+
+async function prosesPembayaran(dataPembayaran) {
+    try {
+        const hasil = await kirimKonfirmasiPembayaran(dataPembayaran);
+
+        alert(
+            "Pembayaran terverifikasi!\n" +
+            "Order: " + hasil.nomorOrder +
+            "\nMetode: " + hasil.metodePembayaran
+        );
+
+        await ambilPesanan();
+    } catch (error) {
+        alert(
+            "Pembayaran belum terverifikasi.\n" +
+            error.message +
+            "\nPeriksa Google Sheets sebelum mencoba kembali."
+        );
+    }
+}
+
+    
 async function ambilPesanan() {
     const statusEl = document.getElementById("statusKoneksi");
 
