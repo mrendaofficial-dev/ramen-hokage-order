@@ -326,11 +326,32 @@ try {
         daftarIDSebelumnya = idSekarang;
         tampilkanPesanan(pesanan);
 
-    } catch (error) {
-        console.error("Gagal mengambil order kasir:", error);
-        statusEl.textContent =
-            "⚠️ Gagal membaca server. Periksa koneksi atau izin akses.";
+    
+} catch (error) {
+    console.error("Gagal mengambil order kasir:", error);
+
+    let cacheTersedia = false;
+
+    try {
+        const cache = localStorage.getItem(KUNCI_CACHE_ORDER);
+
+        if (cache) {
+            const pesananTersimpan = JSON.parse(cache);
+
+            if (Array.isArray(pesananTersimpan)) {
+                tampilkanPesanan(pesananTersimpan);
+                cacheTersedia = true;
+            }
+        }
+    } catch (errorCache) {
+        console.error("Gagal membaca cache order:", errorCache);
     }
+
+    statusEl.textContent = cacheTersedia
+        ? "⚠️ Internet terputus — menampilkan order tersimpan di tablet."
+        : "⚠️ Server tidak dapat diakses dan belum ada order tersimpan.";
+}
+
 }
 
 ambilPesanan();
