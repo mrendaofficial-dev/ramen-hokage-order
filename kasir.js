@@ -6,6 +6,7 @@ let suaraAktif = false;
 let audioContext = null;
 let orderAwalSudahDibaca = false;
 let daftarIDSebelumnya = new Set();
+let pesananUntukCetak = [];
 const KUNCI_CACHE_ORDER = "ramenHokageOrderCacheV1";
 
 function rupiah(nilai) {
@@ -87,6 +88,7 @@ function statusPembayaran(order) {
 
 
 function tampilkanPesanan(pesanan) {
+        pesananUntukCetak = pesanan;
     const daftar = document.getElementById("daftarPesanan");
 
     const tagihanAktif = pesanan.filter(function(order) {
@@ -137,13 +139,135 @@ function tampilkanPesanan(pesanan) {
                 <p class="catatan"><b>Catatan:</b> ${aman(order.catatan || "-")}</p>
                 <p class="total">${rupiah(order.total)}</p>
                 <p><b>Metode pembayaran:</b> ${aman(order.metodePembayaran || "-")}</p>
+                
                 <button type="button"
                     onclick="bukaFormPembayaran('${aman(nomor)}', ${Number(order.total) || 0})">
                     💳 PROSES PEMBAYARAN
                 </button>
+
+                <button type="button"
+                    onclick="cetakTiket('${aman(nomor)}')">
+                    🖨️ CETAK TIKET DAPUR
+                </button>
+
             </article>
         `;
     }).join("");
+}
+
+
+function cetakTiket(nomorOrder) {
+    const order = pesananUntukCetak.find(function(item) {
+        return String(item.nomorOrder) === String(nomorOrder);
+    });
+
+    if (!order) {
+        alert("Data pesanan tidak ditemukan. Muat ulang dashboard saat internet tersedia.");
+        return;
+    }
+
+    const jendelaCetak = window.open("", "_blank");
+
+    if (!jendelaCetak) {
+        alert("Jendela cetak diblokir browser. Izinkan pop-up untuk dashboard kasir.");
+        return;
+    }
+
+    const isiTiket = `
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Tiket Dapur ${aman(order.nomorOrder)}</title>
+            <style>
+                @page {
+                    size: 58mm auto;
+                    margin: 3mm;
+                }
+
+                * {
+                    box-sizing: border-box;
+                }
+
+                body {
+                    width: 52mm;
+                    margin: 0 auto;
+                    font-family: Arial, sans-serif;
+                    color: #000;
+                    font-size: 12px;
+                    overflow-wrap: anywhere;
+                }
+
+                h2 {
+                    text-align: center;
+                    font-size: 18px;
+                    margin: 0 0 4px;
+                }
+
+                .tengah {
+                    text-align: center;
+                }
+
+                .garis {
+                    border-top: 1px dashed #000;
+                    margin: 7px 0;
+                }
+
+                .menu {
+                    white-space: pre-wrap;
+                    font-size: 13px;
+                    font-weight: bold;
+                }
+
+                .catatan {
+                    font-weight: bold;
+                }
+
+                @media screen {
+                    body {
+                        padding: 8px;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <h2>RAMEN HOKAGE</h2>
+            <div class="tengah"><b>TIKET DAPUR</b></div>
+            <div class="garis"></div>
+
+            <b>Order:</b> ${aman(order.nomorOrder)}<br>
+            <b>Waktu:</b> ${aman(order.waktu || "-")}<br>
+            <b>Nama:</b> ${aman(order.nama || "-")}<br>
+            <b>Lantai:</b> ${aman(order.lantai || "-")}<br>
+            <b>Meja:</b> ${aman(order.meja || "-")}<br>
+
+            <div class="garis"></div>
+            <b>DAFTAR PESANAN</b>
+            <div class="menu">${aman(order.daftarPesanan || "-")}</div>
+
+            <div class="garis"></div>
+            <div class="catatan">
+                CATATAN:<br>
+                ${aman(order.catatan || "-")}
+            </div>
+
+            <div class="garis"></div>
+            <div class="tengah"><b>MOHON DIPROSES</b></div>
+
+            <script>
+                window.onload = function() {
+                    window.focus();
+                    window.print();
+                };
+            <\/script>
+        </body>
+        </html>
+    `;
+
+    jendelaCetak.document.open();
+    jendelaCetak.document.write(isiTiket);
+    jendelaCetak.document.close();
 }
 
 function bukaFormPembayaran(nomorOrder, total) {
