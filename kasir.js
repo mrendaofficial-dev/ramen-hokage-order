@@ -347,9 +347,11 @@ try {
         console.error("Gagal membaca cache order:", errorCache);
     }
 
+    
     statusEl.textContent = cacheTersedia
         ? "⚠️ Internet terputus — menampilkan order tersimpan di tablet."
         : "⚠️ Server tidak dapat diakses dan belum ada order tersimpan.";
+    }
 }
 
 ambilPesanan();
