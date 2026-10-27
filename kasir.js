@@ -256,7 +256,34 @@ async function ambilPesanan() {
             throw new Error("Format data server tidak sesuai");
         }
 
-        const pesanan = data.pesanan;
+        
+const pesanan = data.pesanan;
+
+// Perbarui status pembayaran dari server pembayaran.
+await Promise.all(
+    pesanan
+        .filter(order => statusPembayaran(order) !== "LUNAS")
+        .map(async function(order) {
+            try {
+                const terbaru = await cekStatusPembayaran(
+                    order.nomorOrder
+                );
+
+                if (terbaru.statusPembayaran) {
+                    order.statusPembayaran =
+                        String(terbaru.statusPembayaran)
+                            .trim()
+                            .toUpperCase();
+
+                    order.metodePembayaran =
+                        terbaru.metodePembayaran || "";
+                }
+            } catch (error) {
+                // Jika pemeriksaan gagal, gunakan status yang tersedia.
+            }
+        })
+);
+
         const idSekarang = new Set(
             pesanan.map(function(order) {
                 return String(order.nomorOrder);
