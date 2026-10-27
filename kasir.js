@@ -242,9 +242,56 @@ async function cekStatusPembayaran(nomorOrder) {
     return data;
 }
 
+
 async function kirimKonfirmasiPembayaran(dataPembayaran) {
+    const url = URL_API_PEMBAYARAN;
+
+    // Kirim permintaan tanpa mengandalkan respons POST.
+    // Status akhir wajib dibaca kembali dari Google Sheets.
+    try {
+        await fetch(url, {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "text/plain;charset=UTF-8"
+            },
+            body: JSON.stringify({
+                action: "konfirmasiPembayaran",
+                nomorOrder: dataPembayaran.nomorOrder,
+                metode: dataPembayaran.metode,
+                petugas: dataPembayaran.petugas || "Kasir",
+                uangDibayar: dataPembayaran.uangDibayar || 0
+            })
+        });
+    } catch (error) {
+        throw new Error(
+            "Permintaan tidak dapat dikirim. Status pembayaran belum dapat dipastikan."
+        );
+    }
+
+    // Verifikasi ulang melalui endpoint baca status.
+    // Jangan menyatakan berhasil hanya karena POST terkirim.
+    for (let percobaan = 0; percobaan < 6; percobaan++) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        try {
+            const hasil = await cekStatusPembayaran(
+                dataPembayaran.nomorOrder
+            );
+
+            if (
+                String(hasil.statusPembayaran || "").toUpperCase() === "LUNAS" &&
+                String(hasil.metodePembayaran || "").toUpperCase() ===
+                    String(dataPembayaran.metode).toUpperCase()
+            ) {
+                return hasil;
+            }
+        } catch (error) {
+            // Coba membaca ulang pada putaran berikutnya.
+        }
+    }
+
     throw new Error(
-        "Konfirmasi pembayaran belum diaktifkan. " +
-        "Jalur POST harus diuji sebelum transaksi dapat dicatat."
+        "Status LUNAS belum terverifikasi. Periksa Google Sheets sebelum mencoba lagi."
     );
 }
