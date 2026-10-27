@@ -213,3 +213,38 @@ ambilPesanan();
 setInterval(function() {
     ambilPesanan();
 }, 7000);
+
+
+const URL_API_PEMBAYARAN =
+    "https://script.google.com/macros/s/AKfycbwJXTsIfaj6ui_xtXuDA2iGlXVMJRrjO_k36rF4eeEmngVRQKOeR_CQZRpiu_F1A1dcbA/exec";
+
+async function cekStatusPembayaran(nomorOrder) {
+    const url = URL_API_PEMBAYARAN +
+        "?action=statusPembayaran&nomorOrder=" +
+        encodeURIComponent(nomorOrder) +
+        "&t=" + Date.now();
+
+    const response = await fetch(url, {
+        method: "GET",
+        cache: "no-store"
+    });
+
+    if (!response.ok) {
+        throw new Error("Gagal membaca status pembayaran.");
+    }
+
+    const data = await response.json();
+
+    if (data.status !== "success") {
+        throw new Error(data.pesan || "Status pembayaran tidak ditemukan.");
+    }
+
+    return data;
+}
+
+async function kirimKonfirmasiPembayaran(dataPembayaran) {
+    throw new Error(
+        "Konfirmasi pembayaran belum diaktifkan. " +
+        "Jalur POST harus diuji sebelum transaksi dapat dicatat."
+    );
+}
