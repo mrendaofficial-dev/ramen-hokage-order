@@ -6,6 +6,7 @@ let suaraAktif = false;
 let audioContext = null;
 let orderAwalSudahDibaca = false;
 let daftarIDSebelumnya = new Set();
+const KUNCI_CACHE_ORDER = "ramenHokageOrderCacheV1";
 
 function rupiah(nilai) {
     return "Rp" + Number(
@@ -283,6 +284,18 @@ await Promise.all(
             }
         })
 );
+
+try {
+    localStorage.setItem(
+        KUNCI_CACHE_ORDER,
+        JSON.stringify(pesanan)
+    );
+} catch (error) {
+    console.warn(
+        "Order belum dapat disimpan di perangkat:",
+        error
+    );
+}
 
         const idSekarang = new Set(
             pesanan.map(function(order) {
