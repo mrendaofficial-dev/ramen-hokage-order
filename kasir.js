@@ -582,3 +582,28 @@ async function kirimKonfirmasiPembayaran(dataPembayaran) {
         "Status LUNAS belum terverifikasi. Periksa Google Sheets sebelum mencoba lagi."
     );
 }
+
+async function tesServerCleanter() {
+    alert("Mulai tes koneksi Cleanter");
+
+    try {
+        const response = await fetch(
+            "http://localhost:9100/health",
+            { method: "GET" }
+        );
+
+        const hasil = await response.text();
+
+        alert(
+            "Koneksi mendapat respons.\n" +
+            "HTTP: " + response.status +
+            "\nIsi respons: " + (hasil || "(kosong)")
+        );
+    } catch (error) {
+        alert(
+            "Tes koneksi gagal.\n" +
+            "Jenis: " + error.name +
+            "\nPesan: " + error.message
+        );
+    }
+}
