@@ -157,6 +157,7 @@ function tampilkanPesanan(pesanan) {
 
 
 
+
 async function cetakTiket(nomorOrder) {
     const order = pesananUntukCetak.find(function(item) {
         return String(item.nomorOrder) === String(nomorOrder);
@@ -181,37 +182,23 @@ async function cetakTiket(nomorOrder) {
         tombol.textContent = "MENGIRIM TIKET...";
     }
 
+    const pengendali = new AbortController();
+    const batasWaktu = setTimeout(function() {
+        pengendali.abort();
+    }, 45000);
+
     try {
         const content = [
-            {
-                type: "text",
-                text: "RAMEN HOKAGE",
-                align: "center",
-                bold: true,
-                size: "large"
-            },
-            {
-                type: "text",
-                text: "TIKET DAPUR",
-                align: "center",
-                bold: true
-            },
+            { type: "text", text: "RAMEN HOKAGE", align: "center", bold: true },
+            { type: "text", text: "TIKET DAPUR", align: "center", bold: true },
             { type: "divider" },
-            {
-                type: "text",
-                text: "Order: " + (order.nomorOrder || "-"),
-                bold: true
-            },
+            { type: "text", text: "Order: " + (order.nomorOrder || "-") },
             { type: "text", text: "Waktu: " + (order.waktu || "-") },
             { type: "text", text: "Nama: " + (order.nama || "-") },
             { type: "text", text: "Lantai: " + (order.lantai || "-") },
             { type: "text", text: "Meja: " + (order.meja || "-") },
             { type: "divider" },
-            {
-                type: "text",
-                text: "DAFTAR PESANAN",
-                bold: true
-            }
+            { type: "text", text: "DAFTAR PESANAN", bold: true }
         ];
 
         String(order.daftarPesanan || "-")
@@ -228,58 +215,70 @@ async function cetakTiket(nomorOrder) {
             { type: "text", text: "CATATAN:", bold: true },
             { type: "text", text: order.catatan || "-" },
             { type: "divider" },
-            {
-                type: "text",
-                text: "MOHON DIPROSES",
-                align: "center",
-                bold: true
-            },
+            { type: "text", text: "MOHON DIPROSES", align: "center", bold: true },
             { type: "feed", lines: 3 }
         );
 
-        const response = await fetch(
-            "http://localhost:9100/print",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    paperWidth: 58,
-                    cut: true,
-                    reference: String(order.nomorOrder || ""),
-                    content: content
-                })
-            }
-        );
-
-        const hasil = await response.json().catch(function() {
-            return {};
+        const response = await fetch("http://localhost:9100/print", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                paperWidth: 58,
+                cut: true,
+                reference: String(order.nomorOrder || ""),
+                content: content
+            }),
+            signal: pengendali.signal
         });
+
+        const teksHasil = await response.text();
+        let hasil = {};
+
+        try {
+            hasil = JSON.parse(teksHasil);
+        } catch (e) {
+            hasil = { detail: teksHasil };
+        }
 
         if (!response.ok || hasil.status !== "printed") {
             throw new Error(
                 hasil.fix ||
                 hasil.detail ||
                 hasil.error ||
-                ("Layanan cetak memberikan respons HTTP " + response.status)
+                ("Respons Cleanter: HTTP " + response.status)
             );
         }
 
-        alert("Tiket dapur berhasil dikirim ke printer!\nOrder: " +
+        alert("Tiket berhasil dikirim ke printer.\nOrder: " +
             order.nomorOrder);
 
     } catch (error) {
-        console.error("Gagal mencetak tiket:", error);
+        console.error("Diagnostik cetak:", error);
 
-        alert(
-            "Tiket belum berhasil dicetak.\n\n" +
-            (error.message || "Tidak dapat terhubung ke Cleanter.") +
-            "\n\nPastikan Cleanter aktif, printer RPP02N dipilih, " +
-            "dan izin akses perangkat diberikan jika diminta."
-        );
+        let pesan = error.name === "AbortError"
+            ? "Permintaan cetak melewati batas waktu 45 detik."
+            : (error.message || "Koneksi cetak gagal.");
+
+        if (error.name !== "AbortError" &&
+            error.message === "Failed to fetch") {
+            try {
+                const izin = await navigator.permissions.query({
+                    name: "local-network-access"
+                });
+
+                pesan += "\nStatus izin akses perangkat: " + izin.state;
+            } catch (e) {
+                pesan += "\nStatus izin perangkat tidak dapat dibaca browser.";
+            }
+
+            pesan += "\nPeriksa apakah Cleanter masih berjalan.";
+        }
+
+        alert("TIKET BELUM TERCETAK\n\n" + pesan);
 
     } finally {
+        clearTimeout(batasWaktu);
+
         if (tombol) {
             tombol.disabled = false;
             tombol.textContent = "🖨️ CETAK TIKET DAPUR";
