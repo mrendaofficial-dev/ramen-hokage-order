@@ -159,6 +159,7 @@ function tampilkanPesanan(pesanan) {
 
 
 async function cetakTiket(nomorOrder) {
+    alert("TES CETAK: fungsi terbaru sudah berjalan");
     const order = pesananUntukCetak.find(function(item) {
         return String(item.nomorOrder) === String(nomorOrder);
     });
