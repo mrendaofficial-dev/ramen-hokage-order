@@ -583,27 +583,45 @@ async function kirimKonfirmasiPembayaran(dataPembayaran) {
     );
 }
 
+
 async function tesServerCleanter() {
-    alert("Mulai tes koneksi Cleanter");
+    const controller = new AbortController();
+    const timer = setTimeout(function() {
+        controller.abort();
+    }, 3000);
+
+    alert("Tes koneksi Cleanter dimulai. Tunggu hasilnya.");
 
     try {
         const response = await fetch(
             "http://localhost:9100/health",
-            { method: "GET" }
+            {
+                method: "GET",
+                signal: controller.signal
+            }
         );
 
         const hasil = await response.text();
 
         alert(
-            "Koneksi mendapat respons.\n" +
-            "HTTP: " + response.status +
-            "\nIsi respons: " + (hasil || "(kosong)")
+            "SERVER MEMBERI RESPONS\n" +
+            "HTTP: " + response.status + "\n" +
+            "Isi respons: " + (hasil || "(kosong)")
         );
     } catch (error) {
-        alert(
-            "Tes koneksi gagal.\n" +
-            "Jenis: " + error.name +
-            "\nPesan: " + error.message
-        );
+        if (error.name === "AbortError") {
+            alert(
+                "TES WAKTU HABIS: 3 DETIK\n" +
+                "Server tidak memberi respons tepat waktu."
+            );
+        } else {
+            alert(
+                "TES KONEKSI GAGAL\n" +
+                "Jenis: " + error.name + "\n" +
+                "Pesan: " + error.message
+            );
+        }
+    } finally {
+        clearTimeout(timer);
     }
 }
