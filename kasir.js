@@ -156,118 +156,135 @@ function tampilkanPesanan(pesanan) {
 }
 
 
-function cetakTiket(nomorOrder) {
+
+async function cetakTiket(nomorOrder) {
     const order = pesananUntukCetak.find(function(item) {
         return String(item.nomorOrder) === String(nomorOrder);
     });
 
     if (!order) {
-        alert("Data pesanan tidak ditemukan. Muat ulang dashboard saat internet tersedia.");
+        alert("Data pesanan tidak ditemukan. Muat ulang dashboard.");
         return;
     }
 
-    const jendelaCetak = window.open("", "_blank");
+    const tombol = Array.from(document.querySelectorAll("button"))
+        .find(function(btn) {
+            return btn.getAttribute("onclick") &&
+                btn.getAttribute("onclick").includes("cetakTiket(") &&
+                btn.getAttribute("onclick").includes(nomorOrder);
+        });
 
-    if (!jendelaCetak) {
-        alert("Jendela cetak diblokir browser. Izinkan pop-up untuk dashboard kasir.");
-        return;
+    if (tombol && tombol.disabled) return;
+
+    if (tombol) {
+        tombol.disabled = true;
+        tombol.textContent = "MENGIRIM TIKET...";
     }
 
-    const isiTiket = `
-        <!DOCTYPE html>
-        <html lang="id">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>Tiket Dapur ${aman(order.nomorOrder)}</title>
-            <style>
-                @page {
-                    size: 58mm auto;
-                    margin: 3mm;
-                }
+    try {
+        const content = [
+            {
+                type: "text",
+                text: "RAMEN HOKAGE",
+                align: "center",
+                bold: true,
+                size: "large"
+            },
+            {
+                type: "text",
+                text: "TIKET DAPUR",
+                align: "center",
+                bold: true
+            },
+            { type: "divider" },
+            {
+                type: "text",
+                text: "Order: " + (order.nomorOrder || "-"),
+                bold: true
+            },
+            { type: "text", text: "Waktu: " + (order.waktu || "-") },
+            { type: "text", text: "Nama: " + (order.nama || "-") },
+            { type: "text", text: "Lantai: " + (order.lantai || "-") },
+            { type: "text", text: "Meja: " + (order.meja || "-") },
+            { type: "divider" },
+            {
+                type: "text",
+                text: "DAFTAR PESANAN",
+                bold: true
+            }
+        ];
 
-                * {
-                    box-sizing: border-box;
-                }
+        String(order.daftarPesanan || "-")
+            .split(/\r?\n/)
+            .forEach(function(baris) {
+                content.push({
+                    type: "text",
+                    text: baris || " "
+                });
+            });
 
-                body {
-                    width: 52mm;
-                    margin: 0 auto;
-                    font-family: Arial, sans-serif;
-                    color: #000;
-                    font-size: 12px;
-                    overflow-wrap: anywhere;
-                }
+        content.push(
+            { type: "divider" },
+            { type: "text", text: "CATATAN:", bold: true },
+            { type: "text", text: order.catatan || "-" },
+            { type: "divider" },
+            {
+                type: "text",
+                text: "MOHON DIPROSES",
+                align: "center",
+                bold: true
+            },
+            { type: "feed", lines: 3 }
+        );
 
-                h2 {
-                    text-align: center;
-                    font-size: 18px;
-                    margin: 0 0 4px;
-                }
+        const response = await fetch(
+            "http://localhost:9100/print",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    paperWidth: 58,
+                    cut: true,
+                    reference: String(order.nomorOrder || ""),
+                    content: content
+                })
+            }
+        );
 
-                .tengah {
-                    text-align: center;
-                }
+        const hasil = await response.json().catch(function() {
+            return {};
+        });
 
-                .garis {
-                    border-top: 1px dashed #000;
-                    margin: 7px 0;
-                }
+        if (!response.ok || hasil.status !== "printed") {
+            throw new Error(
+                hasil.fix ||
+                hasil.detail ||
+                hasil.error ||
+                ("Layanan cetak memberikan respons HTTP " + response.status)
+            );
+        }
 
-                .menu {
-                    white-space: pre-wrap;
-                    font-size: 13px;
-                    font-weight: bold;
-                }
+        alert("Tiket dapur berhasil dikirim ke printer!\nOrder: " +
+            order.nomorOrder);
 
-                .catatan {
-                    font-weight: bold;
-                }
+    } catch (error) {
+        console.error("Gagal mencetak tiket:", error);
 
-                @media screen {
-                    body {
-                        padding: 8px;
-                    }
-                }
-            </style>
-        </head>
-        <body>
-            <h2>RAMEN HOKAGE</h2>
-            <div class="tengah"><b>TIKET DAPUR</b></div>
-            <div class="garis"></div>
+        alert(
+            "Tiket belum berhasil dicetak.\n\n" +
+            (error.message || "Tidak dapat terhubung ke Cleanter.") +
+            "\n\nPastikan Cleanter aktif, printer RPP02N dipilih, " +
+            "dan izin akses perangkat diberikan jika diminta."
+        );
 
-            <b>Order:</b> ${aman(order.nomorOrder)}<br>
-            <b>Waktu:</b> ${aman(order.waktu || "-")}<br>
-            <b>Nama:</b> ${aman(order.nama || "-")}<br>
-            <b>Lantai:</b> ${aman(order.lantai || "-")}<br>
-            <b>Meja:</b> ${aman(order.meja || "-")}<br>
-
-            <div class="garis"></div>
-            <b>DAFTAR PESANAN</b>
-            <div class="menu">${aman(order.daftarPesanan || "-")}</div>
-
-            <div class="garis"></div>
-            <div class="catatan">
-                CATATAN:<br>
-                ${aman(order.catatan || "-")}
-            </div>
-
-            <div class="garis"></div>
-            <div class="tengah"><b>MOHON DIPROSES</b></div>
-
-            <script>
-                window.onload = function() {
-                    window.focus();
-                    window.print();
-                };
-            <\/script>
-        </body>
-        </html>
-    `;
-
-    jendelaCetak.document.open();
-    jendelaCetak.document.write(isiTiket);
-    jendelaCetak.document.close();
+    } finally {
+        if (tombol) {
+            tombol.disabled = false;
+            tombol.textContent = "🖨️ CETAK TIKET DAPUR";
+        }
+    }
 }
 
 function bukaFormPembayaran(nomorOrder, total) {
