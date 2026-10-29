@@ -146,8 +146,13 @@ function tampilkanPesanan(pesanan) {
                 </button>
 
                 <button type="button"
-                    onclick="cetakTiket('${aman(nomor)}')">
-                    🖨️ CETAK TIKET DAPUR
+                onclick="cetakTiket('${aman(nomor)}')">
+               📱 CETAK VIA CLEANTER
+                </button>
+
+                <button type="button"
+                onclick="cetakTiketWindows('${aman(nomor)}')">
+                💻 CETAK VIA WINDOWS
                 </button>
 
             </article>
@@ -285,6 +290,96 @@ async function cetakTiket(nomorOrder) {
             tombol.textContent = "🖨️ CETAK TIKET DAPUR";
         }
     }
+}
+
+
+function cetakTiketWindows(nomorOrder) {
+    const order = pesananUntukCetak.find(function(item) {
+        return String(item.nomorOrder) === String(nomorOrder);
+    });
+
+    if (!order) {
+        alert("Data pesanan tidak ditemukan. Muat ulang dashboard.");
+        return;
+    }
+
+    // Buka jendela saat tombol diklik agar tidak diblokir browser.
+    const jendela = window.open("", "_blank", "width=400,height=600");
+
+    if (!jendela) {
+        alert("Jendela cetak diblokir. Izinkan pop-up untuk situs kasir.");
+        return;
+    }
+
+    const daftarMenu = String(order.daftarPesanan || "-")
+        .split(/\r?\n/)
+        .map(function(baris) {
+            return "<div class='menu'>" + aman(baris || " ") + "</div>";
+        })
+        .join("");
+
+    const html = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Tiket ${aman(order.nomorOrder || "")}</title>
+<style>
+    * { box-sizing: border-box; }
+    @page { size: 58mm auto; margin: 2mm; }
+    html, body {
+        width: 54mm;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        color: #000;
+    }
+    .tiket { width: 48mm; overflow-wrap: break-word; }
+    .tengah { text-align: center; }
+    .tebal { font-weight: bold; }
+    .garis { border-top: 1px dashed #000; margin: 7px 0; }
+    .baris { margin: 5px 0; }
+    .menu { margin: 5px 0; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div class="tiket">
+    <div class="tengah tebal">
+        <div style="font-size:18px">RAMEN HOKAGE</div>
+        <div>TIKET DAPUR</div>
+    </div>
+    <div class="garis"></div>
+    <div class="baris">Order: ${aman(order.nomorOrder || "-")}</div>
+    <div class="baris">Waktu: ${aman(order.waktu || "-")}</div>
+    <div class="baris">Nama: ${aman(order.nama || "-")}</div>
+    <div class="baris">Lantai: ${aman(order.lantai || "-")}</div>
+    <div class="baris">Meja: ${aman(order.meja || "-")}</div>
+    <div class="garis"></div>
+    <div class="tebal">DAFTAR PESANAN</div>
+    ${daftarMenu}
+    <div class="garis"></div>
+    <div class="tebal">CATATAN:</div>
+    <div class="menu">${aman(order.catatan || "-")}</div>
+    <div class="garis"></div>
+    <div class="tengah tebal">MOHON DIPROSES</div>
+    <div class="garis"></div>
+</div>
+<script>
+window.onload = function() {
+    window.focus();
+    window.print();
+};
+window.onafterprint = function() {
+    window.close();
+};
+<\/script>
+</body>
+</html>`;
+
+    jendela.document.open();
+    jendela.document.write(html);
+    jendela.document.close();
 }
 
 function bukaFormPembayaran(nomorOrder, total) {
