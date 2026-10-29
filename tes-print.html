@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tes Printer Ramen Hokage</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        color: #111;
+    }
+
+    .tiket {
+        width: 48mm;
+        max-width: 100%;
+        margin: 0 auto;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        overflow-wrap: break-word;
+    }
+
+    .tengah {
+        text-align: center;
+    }
+
+    .tebal {
+        font-weight: bold;
+    }
+
+    .garis {
+        border-top: 1px dashed #000;
+        margin: 7px 0;
+    }
+
+    .baris {
+        margin: 5px 0;
+    }
+
+    .menu {
+        margin: 7px 0;
+        white-space: pre-wrap;
+    }
+
+    .tombol {
+        display: block;
+        margin: 20px auto;
+        padding: 12px 20px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    @media print {
+        @page {
+            size: 58mm auto;
+            margin: 2mm;
+        }
+
+        html, body {
+            width: 54mm;
+            margin: 0;
+            padding: 0;
+        }
+
+        .tombol {
+            display: none !important;
+        }
+
+        .tiket {
+            width: 48mm;
+            max-width: none;
+            margin: 0;
+            font-size: 12px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<button class="tombol" onclick="window.print()">
+    CETAK TES PRINTER
+</button>
+
+<div class="tiket">
+    <div class="tengah tebal">
+        <div style="font-size:18px">RAMEN HOKAGE</div>
+        <div>TIKET DAPUR - TES</div>
+    </div>
+
+    <div class="garis"></div>
+
+    <div class="baris">Order: TES-001</div>
+    <div class="baris">Nama: PELANGGAN TES</div>
+    <div class="baris">Lantai: Lt 1</div>
+    <div class="baris">Meja: 01</div>
+
+    <div class="garis"></div>
+
+    <div class="tebal">DAFTAR PESANAN</div>
+    <div class="menu">1 x Ramen Beef
+2 x Es Teh Manis</div>
+
+    <div class="garis"></div>
+
+    <div class="tebal">CATATAN:</div>
+    <div class="menu">Tes cetak laptop</div>
+
+    <div class="garis"></div>
+
+    <div class="tengah tebal">MOHON DIPROSES</div>
+    <div class="tengah" style="margin-top:8px">
+        *** AKHIR TIKET ***
+    </div>
+</div>
+
+</body>
+</html>
