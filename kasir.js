@@ -87,12 +87,19 @@ function statusPembayaran(order) {
 }
 
 
+
 function tampilkanPesanan(pesanan) {
-        pesananUntukCetak = pesanan;
+    pesananUntukCetak = pesanan;
+
     const daftar = document.getElementById("daftarPesanan");
 
+    // Order hanya disembunyikan jika struk kasir sudah berhasil dicetak.
     const tagihanAktif = pesanan.filter(function(order) {
-        return statusPembayaran(order) !== "LUNAS";
+        const statusCetak = String(order.statusCetakKasir || "BELUM CETAK")
+            .trim()
+            .toUpperCase();
+
+        return statusCetak !== "SUDAH CETAK";
     });
 
     const jumlahBaru = tagihanAktif.filter(function(order) {
@@ -112,7 +119,7 @@ function tampilkanPesanan(pesanan) {
     document.getElementById("jumlahSelesai").textContent = jumlahSelesai;
 
     if (tagihanAktif.length === 0) {
-        daftar.innerHTML = "<p>Tidak ada tagihan aktif.</p>";
+        daftar.innerHTML = "<p>Tidak ada order aktif.</p>";
         return;
     }
 
@@ -120,17 +127,26 @@ function tampilkanPesanan(pesanan) {
         const nomor = String(order.nomorOrder || "");
         const statusOrder = String(order.statusOrder || "").trim().toUpperCase();
         const statusBayar = statusPembayaran(order);
+
         const kelas = statusOrder === "DIPROSES"
             ? "proses"
             : statusOrder === "SELESAI"
                 ? "selesai"
                 : "baru";
 
+        const tombolPembayaran = statusBayar === "LUNAS"
+            ? ""
+            : `<button type="button"
+                onclick="bukaFormPembayaran('${aman(nomor)}', ${Number(order.total) || 0})">
+                💳 PROSES PEMBAYARAN
+            </button>`;
+
         return `
             <article class="order ${kelas}">
                 <h3>${aman(nomor)}</h3>
                 <p><b>Status pesanan:</b> ${aman(statusOrder || "-")}</p>
                 <p><b>Status pembayaran:</b> ${aman(statusBayar)}</p>
+                <p><b>Status cetak:</b> ${aman(order.statusCetakKasir || "BELUM CETAK")}</p>
                 <p><b>Waktu order:</b> ${aman(order.waktu)}</p>
                 <p><b>Nama:</b> ${aman(order.nama)}</p>
                 <p><b>Lantai:</b> ${aman(order.lantai)}
@@ -139,22 +155,18 @@ function tampilkanPesanan(pesanan) {
                 <p class="catatan"><b>Catatan:</b> ${aman(order.catatan || "-")}</p>
                 <p class="total">${rupiah(order.total)}</p>
                 <p><b>Metode pembayaran:</b> ${aman(order.metodePembayaran || "-")}</p>
-                
+
+                ${tombolPembayaran}
+
                 <button type="button"
-                    onclick="bukaFormPembayaran('${aman(nomor)}', ${Number(order.total) || 0})">
-                    💳 PROSES PEMBAYARAN
+                    onclick="cetakTiket('${aman(nomor)}')">
+                    📱 CETAK VIA CLEANTER
                 </button>
 
                 <button type="button"
-                onclick="cetakTiket('${aman(nomor)}')">
-               📱 CETAK VIA CLEANTER
+                    onclick="cetakTiketWindows('${aman(nomor)}')">
+                    💻 CETAK VIA WINDOWS
                 </button>
-
-                <button type="button"
-                onclick="cetakTiketWindows('${aman(nomor)}')">
-                💻 CETAK VIA WINDOWS
-                </button>
-
             </article>
         `;
     }).join("");
