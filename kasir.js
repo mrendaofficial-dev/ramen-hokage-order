@@ -157,6 +157,12 @@ function tampilkanPesanan(pesanan) {
                 <p><b>Metode pembayaran:</b> ${aman(order.metodePembayaran || "-")}</p>
 
                 ${tombolPembayaran}
+                ${statusBayar === "LUNAS" ? `
+                <button type="button"
+                onclick="cetakStrukKasir('${aman(nomor)}')">
+               🧾 CETAK STRUK KASIR
+               </button>
+               ` : ""}
 
                 <button type="button"
                     onclick="cetakTiket('${aman(nomor)}')">
@@ -304,6 +310,194 @@ async function cetakTiket(nomorOrder) {
     }
 }
 
+
+async function cetakStrukKasir(nomorOrder) {
+    const order = pesananUntukCetak.find(function(item) {
+        return String(item.nomorOrder) === String(nomorOrder);
+    });
+
+    if (!order) {
+        alert("Data pesanan tidak ditemukan.");
+        return;
+    }
+
+    if (statusPembayaran(order) !== "LUNAS") {
+        alert("Struk hanya dapat dicetak untuk pembayaran LUNAS.");
+        return;
+    }
+
+    if (!confirm("Cetak STRUK KASIR untuk order " + nomorOrder + "?")) {
+        return;
+    }
+
+    const tombol = Array.from(document.querySelectorAll("button"))
+        .find(function(btn) {
+            return btn.getAttribute("onclick") &&
+                btn.getAttribute("onclick").includes("cetakStrukKasir(") &&
+                btn.getAttribute("onclick").includes(nomorOrder);
+        });
+
+    if (tombol) {
+        tombol.disabled = true;
+        tombol.textContent = "MENCETAK STRUK...";
+    }
+
+    let cetakBerhasil = false;
+
+    try {
+        const content = [
+            { type: "text", text: "RAMEN HOKAGE", align: "center", bold: true },
+            { type: "text", text: "STRUK PEMBAYARAN", align: "center", bold: true },
+            { type: "divider" },
+            { type: "text", text: "Order: " + (order.nomorOrder || "-") },
+            { type: "text", text: "Waktu: " + (order.waktu || "-") },
+            { type: "text", text: "Nama: " + (order.nama || "-") },
+            { type: "text", text: "Lantai: " + (order.lantai || "-") },
+            { type: "text", text: "Meja: " + (order.meja || "-") },
+            { type: "divider" },
+            { type: "text", text: "DAFTAR PESANAN", bold: true }
+        ];
+
+        String(order.daftarPesanan || "-")
+            .split(/\r?\n/)
+            .forEach(function(baris) {
+                content.push({
+                    type: "text",
+                    text: baris || " "
+                });
+            });
+
+        content.push(
+            { type: "divider" },
+            { type: "text", text: "TOTAL: " + rupiah(order.total), bold: true },
+            { type: "text", text: "Metode: " + (order.metodePembayaran || "-") },
+            { type: "text", text: "STATUS: LUNAS", bold: true },
+            { type: "divider" },
+            { type: "text", text: "TERIMA KASIH", align: "center", bold: true },
+            { type: "text", text: "SELAMAT MENIKMATI", align: "center" },
+            { type: "feed", lines: 3 }
+        );
+
+        const response = await fetch("http://localhost:9100/print", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                paperWidth: 58,
+                cut: true,
+                reference: String(order.nomorOrder || ""),
+                content: content
+            })
+        });
+
+        const teksHasil = await response.text();
+        let hasil = {};
+
+        try {
+            hasil = JSON.parse(teksHasil);
+        } catch (e) {
+            hasil = { detail: teksHasil };
+        }
+
+        if (!response.ok || hasil.status !== "printed") {
+            throw new Error(
+                hasil.fix ||
+                hasil.detail ||
+                hasil.error ||
+                ("Respons Cleanter: HTTP " + response.status)
+            );
+        }
+
+        cetakBerhasil = true;
+
+    } catch (error) {
+        console.error("Gagal mencetak struk:", error);
+
+        alert(
+            "STATUS CETAK BELUM TERKONFIRMASI.\n\n" +
+            (error.message || "Koneksi printer gagal.") +
+            "\n\nPeriksa printer dan hasil cetak sebelum mencoba kembali. " +
+            "Jangan langsung mengulang karena tiket mungkin masih mengantre."
+        );
+
+    } finally {
+        if (tombol) {
+            tombol.disabled = false;
+            tombol.textContent = "🧾 CETAK STRUK KASIR";
+        }
+    }
+
+    if (!cetakBerhasil) return;
+
+    // Printer sudah mengonfirmasi status printed.
+    // Sekarang baru kirim konfirmasi ke Apps Script.
+    try {
+        await fetch(URL_API_KASIR, {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "text/plain;charset=UTF-8"
+            },
+            body: JSON.stringify({
+                action: "konfirmasiCetakKasir",
+                nomorOrder: nomorOrder
+            })
+        });
+
+        // Verifikasi status cetak melalui pembacaan Google Sheets.
+        let sudahTercatat = false;
+
+        for (let i = 0; i < 8; i++) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            const response = await fetch(
+                URL_API_KASIR + "?action=pesananKasir&t=" + Date.now(),
+                { cache: "no-store" }
+            );
+
+            const data = await response.json();
+
+            if (data.status !== "success" || !Array.isArray(data.pesanan)) {
+                continue;
+            }
+
+            const terbaru = data.pesanan.find(function(item) {
+                return String(item.nomorOrder) === String(nomorOrder);
+            });
+
+            if (
+                terbaru &&
+                String(terbaru.statusCetakKasir || "").toUpperCase() === "SUDAH CETAK"
+            ) {
+                sudahTercatat = true;
+                break;
+            }
+        }
+
+        if (sudahTercatat) {
+            alert(
+                "STRUK BERHASIL DICETAK DAN TERCATAT!\n" +
+                "Order: " + nomorOrder
+            );
+
+            await ambilPesanan();
+
+        } else {
+            alert(
+                "Struk sudah dicetak oleh printer, tetapi statusnya " +
+                "belum terkonfirmasi di Google Sheets.\n\n" +
+                "Jangan cetak ulang dahulu. Periksa kolom O pada sheet ORDER."
+            );
+        }
+
+    } catch (error) {
+        console.error("Konfirmasi cetak gagal:", error);
+
+        alert(
+            "Struk sudah dicetak, tetapi konfirmasi ke Google Sheets belum berhasil.\n\n" +
+            "Jangan cetak ulang dahulu. Periksa kolom O pada sheet ORDER."
+        );
+    }
+}
 
 function cetakTiketWindows(nomorOrder) {
     const order = pesananUntukCetak.find(function(item) {
