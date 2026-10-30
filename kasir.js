@@ -540,13 +540,6 @@ function cetakStrukKasir(nomorOrder) {
 
 
 async function konfirmasiCetakKasir(nomorOrder) {
-    if (!confirm(
-        "Konfirmasi struk sudah tercetak untuk order " +
-        nomorOrder + "?"
-    )) {
-        return;
-    }
-
     try {
         await fetch(URL_API_KASIR, {
             method: "POST",
