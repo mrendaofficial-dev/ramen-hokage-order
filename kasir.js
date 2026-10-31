@@ -1044,3 +1044,268 @@ async function tesServerCleanter() {
         clearTimeout(timer);
     }
 }
+
+// ==========================================
+// KONTROL BUKA / TUTUP KEDAI RAMEN HOKAGE
+// ==========================================
+
+const KUNCI_TOKEN_KASIR = "ramenHokageTokenKasir";
+
+function buatTokenKasirDashboard() {
+    if (!window.crypto || !window.crypto.randomUUID) {
+        throw new Error("Browser tidak mendukung pembuatan token aman.");
+    }
+
+    return window.crypto.randomUUID();
+}
+
+function ambilTokenKasirDashboard() {
+    let token = sessionStorage.getItem(KUNCI_TOKEN_KASIR);
+
+    if (!token) {
+        token = buatTokenKasirDashboard();
+        sessionStorage.setItem(KUNCI_TOKEN_KASIR, token);
+    }
+
+    return token;
+}
+
+async function kirimPerintahKedai(data) {
+    await fetch(URL_API_KASIR, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+            "Content-Type": "text/plain;charset=UTF-8"
+        },
+        body: JSON.stringify(data)
+    });
+}
+
+async function bacaStatusKedaiDashboard() {
+    const response = await fetch(
+        URL_API_KASIR + "?action=statusKedai&t=" + Date.now(),
+        { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+        throw new Error("Gagal membaca status kedai.");
+    }
+
+    return await response.json();
+}
+
+async function ambilKodeAksesDashboard(token) {
+    const response = await fetch(
+        URL_API_KASIR +
+        "?action=aksesKasir&token=" +
+        encodeURIComponent(token) +
+        "&t=" + Date.now(),
+        { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+        throw new Error("Gagal memeriksa akses kasir.");
+    }
+
+    return await response.json();
+}
+
+function tampilkanStatusKedaiDashboard(aktif) {
+    const status = document.getElementById("statusKedaiDashboard");
+    const tombolBuka = document.getElementById("btnBukaKedai");
+    const tombolTutup = document.getElementById("btnTutupKedai");
+
+    if (aktif) {
+        status.textContent = "🟢 KEDAI SEDANG BUKA";
+        tombolBuka.disabled = true;
+        tombolTutup.disabled = false;
+    } else {
+        status.textContent = "🔴 KEDAI SEDANG TUTUP";
+        tombolBuka.disabled = false;
+        tombolTutup.disabled = true;
+
+        document.getElementById("tampilanKodeAkses").style.display = "none";
+        document.getElementById("kodeAksesPelanggan").textContent = "----";
+    }
+}
+
+async function cekStatusAwalKedai() {
+    try {
+        const data = await bacaStatusKedaiDashboard();
+
+        if (data.status !== "success") {
+            throw new Error("Respons status kedai tidak valid.");
+        }
+
+        tampilkanStatusKedaiDashboard(data.kedaiAktif);
+
+        if (data.kedaiAktif) {
+            const token = sessionStorage.getItem(KUNCI_TOKEN_KASIR);
+
+            if (token) {
+                const akses = await ambilKodeAksesDashboard(token);
+
+                if (akses.status === "success") {
+                    document.getElementById("kodeAksesPelanggan").textContent =
+                        akses.kodeAkses;
+
+                    document.getElementById("tampilanKodeAkses").style.display =
+                        "block";
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Pemeriksaan status kedai gagal:", error);
+        document.getElementById("statusKedaiDashboard").textContent =
+            "⚠️ Gagal menghubungi server kedai.";
+    }
+}
+
+async function bukaKedaiDashboard() {
+    const inputPin = document.getElementById("pinKasirDashboard");
+    const pin = inputPin.value.trim();
+
+    if (!/^\d{6}$/.test(pin)) {
+        alert("Masukkan PIN Kasir 6 digit.");
+        return;
+    }
+
+    const tombol = document.getElementById("btnBukaKedai");
+
+    try {
+        tombol.disabled = true;
+        tombol.textContent = "MEMBUKA KEDAI...";
+
+        const token = ambilTokenKasirDashboard();
+
+        await kirimPerintahKedai({
+            action: "bukaKedai",
+            pin: pin,
+            tokenKasir: token
+        });
+
+        let akses = null;
+
+        // Verifikasi hasil POST melalui endpoint GET.
+        for (let i = 0; i < 8; i++) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            try {
+                akses = await ambilKodeAksesDashboard(token);
+
+                if (
+                    akses.status === "success" &&
+                    /^\d{4}$/.test(akses.kodeAkses)
+                ) {
+                    break;
+                }
+            } catch (error) {
+                // Coba ulang membaca hasil.
+            }
+        }
+
+        inputPin.value = "";
+
+        if (!akses || akses.status !== "success" ||
+            !/^\d{4}$/.test(akses.kodeAkses)) {
+            sessionStorage.removeItem(KUNCI_TOKEN_KASIR);
+            throw new Error(
+                "Kedai belum berhasil dibuka. Periksa PIN atau koneksi server."
+            );
+        }
+
+        document.getElementById("kodeAksesPelanggan").textContent =
+            akses.kodeAkses;
+
+        document.getElementById("tampilanKodeAkses").style.display = "block";
+
+        tampilkanStatusKedaiDashboard(true);
+
+        alert("Kedai berhasil dibuka!\nKode akses: " + akses.kodeAkses);
+
+    } catch (error) {
+        console.error("Buka kedai gagal:", error);
+        alert(error.message);
+        await cekStatusAwalKedai();
+
+    } finally {
+        tombol.textContent = "🔓 BUKA KEDAI";
+        await cekStatusAwalKedai();
+    }
+}
+
+async function tutupKedaiDashboard() {
+    const inputPin = document.getElementById("pinKasirDashboard");
+    const pin = inputPin.value.trim();
+
+    if (!/^\d{6}$/.test(pin)) {
+        alert("Masukkan PIN Kasir 6 digit.");
+        return;
+    }
+
+    if (!confirm("Yakin ingin menutup kedai dan menonaktifkan kode akses?")) {
+        return;
+    }
+
+    const tombol = document.getElementById("btnTutupKedai");
+
+    try {
+        tombol.disabled = true;
+        tombol.textContent = "MENUTUP KEDAI...";
+
+        const token = sessionStorage.getItem(KUNCI_TOKEN_KASIR);
+
+        if (!token) {
+            throw new Error(
+                "Sesi kasir tidak ditemukan. Silakan buka kedai melalui sesi kasir ini."
+            );
+        }
+
+        await kirimPerintahKedai({
+            action: "tutupKedai",
+            pin: pin,
+            tokenKasir: token
+        });
+
+        let status = null;
+
+        for (let i = 0; i < 8; i++) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            try {
+                status = await bacaStatusKedaiDashboard();
+
+                if (status.status === "success" &&
+                    status.kedaiAktif === false) {
+                    break;
+                }
+            } catch (error) {
+                // Coba ulang membaca status.
+            }
+        }
+
+        inputPin.value = "";
+
+        if (!status || status.kedaiAktif !== false) {
+            throw new Error("Status tutup kedai belum dapat diverifikasi.");
+        }
+
+        sessionStorage.removeItem(KUNCI_TOKEN_KASIR);
+
+        tampilkanStatusKedaiDashboard(false);
+
+        alert("Kedai berhasil ditutup. Kode akses sudah dinonaktifkan.");
+
+    } catch (error) {
+        console.error("Tutup kedai gagal:", error);
+        alert(error.message);
+
+    } finally {
+        tombol.textContent = "🔒 TUTUP KEDAI";
+        await cekStatusAwalKedai();
+    }
+}
+
+// Periksa status kedai saat dashboard dibuka.
+cekStatusAwalKedai();
+
