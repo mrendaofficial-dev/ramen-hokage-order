@@ -1060,16 +1060,21 @@ function buatTokenKasirDashboard() {
 }
 
 function ambilTokenKasirDashboard() {
-    let token = sessionStorage.getItem(KUNCI_TOKEN_KASIR);
+    let token = localStorage.getItem(KUNCI_TOKEN_KASIR);
+
+    // Memindahkan token lama jika masih tersimpan di sessionStorage
+    if (!token) {
+        token = sessionStorage.getItem(KUNCI_TOKEN_KASIR);
+    }
 
     if (!token) {
         token = buatTokenKasirDashboard();
-        sessionStorage.setItem(KUNCI_TOKEN_KASIR, token);
     }
+
+    localStorage.setItem(KUNCI_TOKEN_KASIR, token);
 
     return token;
 }
-
 async function kirimPerintahKedai(data) {
     await fetch(URL_API_KASIR, {
         method: "POST",
@@ -1140,7 +1145,9 @@ async function cekStatusAwalKedai() {
         tampilkanStatusKedaiDashboard(data.kedaiAktif);
 
         if (data.kedaiAktif) {
-            const token = sessionStorage.getItem(KUNCI_TOKEN_KASIR);
+            const token =
+    localStorage.getItem(KUNCI_TOKEN_KASIR) ||
+    sessionStorage.getItem(KUNCI_TOKEN_KASIR);
 
             if (token) {
                 const akses = await ambilKodeAksesDashboard(token);
@@ -1253,13 +1260,10 @@ async function tutupKedaiDashboard() {
         tombol.disabled = true;
         tombol.textContent = "MENUTUP KEDAI...";
 
-        const token = sessionStorage.getItem(KUNCI_TOKEN_KASIR);
-
-        if (!token) {
-            throw new Error(
-                "Sesi kasir tidak ditemukan. Silakan buka kedai melalui sesi kasir ini."
-            );
-        }
+        const token =
+    localStorage.getItem(KUNCI_TOKEN_KASIR) ||
+    sessionStorage.getItem(KUNCI_TOKEN_KASIR) ||
+    "";
 
         await kirimPerintahKedai({
             action: "tutupKedai",
@@ -1290,7 +1294,8 @@ async function tutupKedaiDashboard() {
             throw new Error("Status tutup kedai belum dapat diverifikasi.");
         }
 
-        sessionStorage.removeItem(KUNCI_TOKEN_KASIR);
+        localStorage.removeItem(KUNCI_TOKEN_KASIR);
+sessionStorage.removeItem(KUNCI_TOKEN_KASIR);
 
         tampilkanStatusKedaiDashboard(false);
 
