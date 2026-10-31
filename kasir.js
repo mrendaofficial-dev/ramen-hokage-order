@@ -1215,7 +1215,8 @@ async function bukaKedaiDashboard() {
 
         if (!akses || akses.status !== "success" ||
             !/^\d{4}$/.test(akses.kodeAkses)) {
-            sessionStorage.removeItem(KUNCI_TOKEN_KASIR);
+            localStorage.removeItem(KUNCI_TOKEN_KASIR);
+sessionStorage.removeItem(KUNCI_TOKEN_KASIR);
             throw new Error(
                 "Kedai belum berhasil dibuka. Periksa PIN atau koneksi server."
             );
