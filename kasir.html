@@ -24,6 +24,96 @@
                 🔄 SEGARKAN
             </button>
         </div>
+        <section id="panelKontrolKedai" style="
+    background:#222;
+    border:1px solid #ffcc00;
+    border-radius:12px;
+    padding:18px;
+    margin-bottom:22px;
+    text-align:center;
+">
+
+    <h2 style="color:#ffcc00; margin-top:0;">
+        🔐 KONTROL OPERASIONAL KEDAI
+    </h2>
+
+    <p id="statusKedaiDashboard" style="color:#ccc;">
+        Memeriksa status kedai...
+    </p>
+
+    <div style="max-width:320px; margin:auto;">
+
+        <input
+            type="password"
+            id="pinKasirDashboard"
+            inputmode="numeric"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            placeholder="Masukkan PIN Kasir 6 digit"
+            autocomplete="off"
+            style="
+                width:100%;
+                padding:13px;
+                margin:10px 0;
+                border-radius:8px;
+                border:1px solid #777;
+                font-size:18px;
+                text-align:center;
+                letter-spacing:5px;
+            "
+        >
+
+        <button
+            type="button"
+            id="btnBukaKedai"
+            onclick="bukaKedaiDashboard()"
+            style="width:100%; margin:6px 0; background:#198754; color:white;"
+        >
+            🔓 BUKA KEDAI
+        </button>
+
+        <button
+            type="button"
+            id="btnTutupKedai"
+            onclick="tutupKedaiDashboard()"
+            style="width:100%; margin:6px 0; background:#dc3545; color:white;"
+        >
+            🔒 TUTUP KEDAI
+        </button>
+
+    </div>
+
+    <div id="tampilanKodeAkses" style="
+        display:none;
+        margin-top:18px;
+        padding:15px;
+        background:#111;
+        border:1px dashed #ffcc00;
+        border-radius:10px;
+    ">
+
+        <p style="color:#ffcc00; margin:0;">
+            KODE AKSES PELANGGAN HARI INI
+        </p>
+
+        <strong
+            id="kodeAksesPelanggan"
+            style="
+                display:block;
+                font-size:38px;
+                letter-spacing:10px;
+                color:#fff;
+                margin:10px 0;
+            "
+        >----</strong>
+
+        <p style="color:#aaa; font-size:12px; margin-bottom:0;">
+            Berikan kode ini kepada pelanggan untuk melakukan pemesanan.
+        </p>
+
+    </div>
+
+</section>
 
         <section class="ringkasan">
             <div class="kotak">
