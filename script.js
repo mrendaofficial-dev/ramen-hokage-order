@@ -299,19 +299,29 @@ function resetPesanan() {
 }
 
 
+
 function tampilLantai1() {
 
     let tampilanMenu = `
         <h2>🍜 MENU RAMEN HOKAGE LT. 1</h2>
 
         <div>
-        <button onclick="resetPesanan(); pilihLantai()">
-        ← GANTI LANTAI
-        </button>
-        <div>
+            <button onclick="resetPesanan(); pilihLantai()">
+                ← GANTI LANTAI
+            </button>
+        </div>
     `;
 
-    menuLt1.forEach(function(menu, index) {
+    // KELOMPOK MENU MAKANAN
+    tampilanMenu += `
+        <div class="menu-section">
+            <h2 class="judul-kategori">🍜 MAKANAN</h2>
+            <div class="menu-container">
+    `;
+
+    for (let index = 0; index <= 8; index++) {
+
+        let menu = menuLt1[index];
 
         tampilanMenu += `
             <div class="menu-item">
@@ -319,72 +329,117 @@ function tampilLantai1() {
 
                 <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
 
-                <button class="btn-kurang" onclick="ubahJumlah(${index}, -1)">−</button>
+                <button class="btn-kurang"
+                    onclick="ubahJumlah(${index}, -1)">−</button>
 
                 <span id="jumlah-${index}">
                     ${jumlahMenuLt1[index]}
                 </span>
 
-                <button class="btn-tambah" onclick="ubahJumlah(${index}, 1)">+</button>
+                <button class="btn-tambah"
+                    onclick="ubahJumlah(${index}, 1)">+</button>
             </div>
         `;
-    });
+    }
+
+    tampilanMenu += `
+            </div>
+        </div>
+    `;
 
 
+    // KELOMPOK MENU MINUMAN
+    tampilanMenu += `
+        <div class="menu-section">
+            <h2 class="judul-kategori">🥤 MINUMAN</h2>
+            <div class="menu-container">
+    `;
+
+    for (let index = 9; index <= 12; index++) {
+
+        let menu = menuLt1[index];
+
+        tampilanMenu += `
+            <div class="menu-item">
+                <h3>${menu.nama}</h3>
+
+                <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
+
+                <button class="btn-kurang"
+                    onclick="ubahJumlah(${index}, -1)">−</button>
+
+                <span id="jumlah-${index}">
+                    ${jumlahMenuLt1[index]}
+                </span>
+
+                <button class="btn-tambah"
+                    onclick="ubahJumlah(${index}, 1)">+</button>
+            </div>
+        `;
+    }
+
+    tampilanMenu += `
+            </div>
+        </div>
+    `;
+
+
+    // TOTAL PESANAN
     tampilanMenu += `
         <h2 id="totalOrder">TOTAL: Rp0</h2>
     `;
 
 
+    // KERANJANG
     tampilanMenu += `
         <div id="keranjang">
-        <h2>🛒 PESANAN ANDA</h2>
-        <div id="daftarPesanan"></div>
+            <h2>🛒 PESANAN ANDA</h2>
+            <div id="daftarPesanan"></div>
         </div>
-`   ;
+    `;
 
 
+    // DATA PEMESAN
     tampilanMenu += `
         <div id="dataPemesan">
 
-        <h2>👤 DATA PEMESAN</h2>
+            <h2>👤 DATA PEMESAN</h2>
 
-        <p>Nama Pelanggan</p>
+            <p>Nama Pelanggan</p>
 
-        <input
-            type="text"
-            id="namaPelanggan"
-            placeholder="Masukkan nama"
-        >
+            <input
+                type="text"
+                id="namaPelanggan"
+                placeholder="Masukkan nama"
+            >
 
-        <p>Nomor Meja</p>
+            <p>Nomor Meja</p>
 
-        <div class="info-meja">
-            ${idMejaQR}
+            <div class="info-meja">
+                ${idMejaQR}
+            </div>
+
+            <p>Catatan</p>
+
+            <textarea
+                id="catatanPesanan"
+                placeholder="Contoh: Tidak pedas"
+            ></textarea>
+
+            <br><br>
+
+            <button onclick="simpanDataPemesan()">
+                LANJUT
+            </button>
+
         </div>
+    `;
 
-        <p>Catatan</p>
+    document.getElementById("menu").innerHTML = tampilanMenu;
 
-        <textarea
-            id="catatanPesanan"
-            placeholder="Contoh: Tidak pedas"
-        ></textarea>
+    hitungTotal();
 
-        <br><br>
-
-        <button onclick="simpanDataPemesan()">
-            LANJUT
-        </button>
-
-    </div>
-`;
-    
-
-document.getElementById("menu").innerHTML = tampilanMenu;
-
-hitungTotal();
-
-tampilkanKeranjang();
+    tampilkanKeranjang();
 
 }
 
