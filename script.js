@@ -129,6 +129,8 @@ let dataNama = "";
 
 let dataMeja = "";
 
+let idMejaQR = "";
+
 let dataCatatan = "";
 
 let lantaiPelanggan = "";
@@ -137,7 +139,45 @@ let modeOrder = "KUNCI_LANTAI";
 
 // PENGATURAN LANTAI
 const LANTAI2_AKTIF = false;
+// MEMBACA IDENTITAS MEJA DARI QR
+function ambilIdentitasMejaQR() {
 
+    const parameterURL =
+        new URLSearchParams(window.location.search);
+
+    const meja =
+        String(parameterURL.get("meja") || "")
+        .trim()
+        .toUpperCase();
+
+    const daftarMejaLt1 = [
+        "L1-01",
+        "L1-02",
+        "L1-03",
+        "L1-04",
+        "L1-05",
+        "L1-06",
+        "L1-07",
+        "L1-08",
+        "L1-09"
+    ];
+
+    if (!daftarMejaLt1.includes(meja)) {
+
+        document.getElementById("menu").innerHTML = `
+            <h2>⚠️ QR MEJA TIDAK VALID</h2>
+            <p>Silakan pindai QR meja Ramen Hokage yang tersedia.</p>
+        `;
+
+        return false;
+    }
+
+    idMejaQR = meja;
+    dataMeja = meja;
+    lantaiPelanggan = "LT. 1";
+
+    return true;
+}
 
 function cekModeOrder() {
 
@@ -319,11 +359,9 @@ function tampilLantai1() {
 
         <p>Nomor Meja</p>
 
-        <input
-            type="text"
-            id="nomorMeja"
-            placeholder="Contoh: 05"
-        >
+        <div class="info-meja">
+            ${idMejaQR}
+        </div>
 
         <p>Catatan</p>
 
@@ -933,22 +971,20 @@ function kembaliKeMenu() {
 function simpanDataPemesan() {
 
     let nama =
-        document.getElementById("namaPelanggan").value;
+    document.getElementById("namaPelanggan").value;
 
-    let meja =
-        document.getElementById("nomorMeja").value;
+    let meja = idMejaQR;
 
     let catatan =
         document.getElementById("catatanPesanan").value;
 
 
-    if (nama === "" || meja === "") {
+    if (nama.trim() === "" || !idMejaQR) {
 
-        alert("Nama dan nomor meja wajib diisi!");
+    alert("Nama pelanggan wajib diisi atau QR meja tidak valid!");
 
-        return;
-    }
-
+    return;
+}
     let pesananLt1 = ambilPesananLt1();
     let pesananLt2 = ambilPesananLt2();
 
@@ -1183,12 +1219,14 @@ function pesanLagi() {
     resetPesanan();
 
     dataNama = "";
-    dataMeja = "";
+    dataMeja = idMejaQR;
     dataCatatan = "";
-
+    
     pilihLantai();
 }
 
-ambilModeDariServer();
+if (ambilIdentitasMejaQR()) {
+    ambilModeDariServer();
+}
 
 
