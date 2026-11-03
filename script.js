@@ -591,122 +591,208 @@ function tampilLantai2() {
 }
 
 
+
 function tampilMenuGabungan() {
 
     let tampilanMenu = `
-    <p class="mode-gabungan">
-        MODE GABUNGAN
-    </p>
+        <p class="mode-gabungan">
+            MODE GABUNGAN
+        </p>
 
-    <hr>
-
-    <h2>🍜 MENU LT. 1</h2>
-`;
-
-    menuLt1.forEach(function(menu, index) {
-
-        tampilanMenu += `
-            <div class="menu-item">
-                <h3>${menu.nama}</h3>
-
-                <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
-
-                <button class="btn-kurang" onclick="ubahJumlahGabunganLt1(${index}, -1)">−</button>
-
-                <span id="jumlah-gabung-lt1-${index}">
-                    ${jumlahMenuLt1[index]}
-                </span>
-
-                <button class="btn-tambah" onclick="ubahJumlahGabunganLt1(${index}, 1)">+</button>
-            </div>
-        `;
-    });
-
-    tampilanMenu += `
         <hr>
 
-        <h2>🍜 MENU LT. 2</h2>
+        <div class="menu-section">
+            <h2 class="judul-kategori">🍜 MAKANAN</h2>
+
+            <h3>MENU LANTAI 1</h3>
+            <div class="menu-container">
     `;
 
-    menuLt2.forEach(function(menu, index) {
+    // MAKANAN LANTAI 1: INDEX 0 SAMPAI 8
+    menuLt1.forEach(function(menu, index) {
 
-        tampilanMenu += `
-        <div class="menu-item">
-        <h3>${menu.nama}</h3>
+        if (index >= 0 && index <= 8) {
 
-                <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
+            tampilanMenu += `
+                <div class="menu-item">
+                    <h3>${menu.nama}</h3>
 
-                <button class="btn-kurang" onclick="ubahJumlahGabunganLt2(${index}, -1)">−</button>
+                    <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
 
-                <span id="jumlah-gabung-lt2-${index}">
-                    ${jumlahMenuLt2[index]}
-                </span>
+                    <button class="btn-kurang"
+                    onclick="ubahJumlahGabunganLt1(${index}, -1)">−</button>
 
-                <button class="btn-tambah" onclick="ubahJumlahGabunganLt2(${index}, 1)">+</button>
-            </div>
-        `;
+                    <span id="jumlah-gabung-lt1-${index}">
+                        ${jumlahMenuLt1[index]}
+                    </span>
+
+                    <button class="btn-tambah"
+                    onclick="ubahJumlahGabunganLt1(${index}, 1)">+</button>
+                </div>
+            `;
+        }
+
     });
 
     tampilanMenu += `
+            </div>
+
+            <h3>MENU LANTAI 2</h3>
+            <div class="menu-container">
+    `;
+
+    // MAKANAN LANTAI 2: INDEX 0 SAMPAI 3
+    menuLt2.forEach(function(menu, index) {
+
+        if (index >= 0 && index <= 3) {
+
+            tampilanMenu += `
+                <div class="menu-item">
+                    <h3>${menu.nama}</h3>
+
+                    <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
+
+                    <button class="btn-kurang"
+                    onclick="ubahJumlahGabunganLt2(${index}, -1)">−</button>
+
+                    <span id="jumlah-gabung-lt2-${index}">
+                        ${jumlahMenuLt2[index]}
+                    </span>
+
+                    <button class="btn-tambah"
+                    onclick="ubahJumlahGabunganLt2(${index}, 1)">+</button>
+                </div>
+            `;
+        }
+
+    });
+
+    tampilanMenu += `
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <h2 class="judul-kategori">🥤 MINUMAN</h2>
+
+            <h3>MENU LANTAI 1</h3>
+            <div class="menu-container">
+    `;
+
+    // MINUMAN LANTAI 1: INDEX 9 SAMPAI 12
+    menuLt1.forEach(function(menu, index) {
+
+        if (index >= 9 && index <= 12) {
+
+            tampilanMenu += `
+                <div class="menu-item">
+                    <h3>${menu.nama}</h3>
+
+                    <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
+
+                    <button class="btn-kurang"
+                    onclick="ubahJumlahGabunganLt1(${index}, -1)">−</button>
+
+                    <span id="jumlah-gabung-lt1-${index}">
+                        ${jumlahMenuLt1[index]}
+                    </span>
+
+                    <button class="btn-tambah"
+                    onclick="ubahJumlahGabunganLt1(${index}, 1)">+</button>
+                </div>
+            `;
+        }
+
+    });
+
+    tampilanMenu += `
+            </div>
+
+            <h3>MENU LANTAI 2</h3>
+            <div class="menu-container">
+    `;
+
+    // MINUMAN LANTAI 2: INDEX 4 SAMPAI 8
+    menuLt2.forEach(function(menu, index) {
+
+        if (index >= 4 && index <= 8) {
+
+            tampilanMenu += `
+                <div class="menu-item">
+                    <h3>${menu.nama}</h3>
+
+                    <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
+
+                    <button class="btn-kurang"
+                    onclick="ubahJumlahGabunganLt2(${index}, -1)">−</button>
+
+                    <span id="jumlah-gabung-lt2-${index}">
+                        ${jumlahMenuLt2[index]}
+                    </span>
+
+                    <button class="btn-tambah"
+                    onclick="ubahJumlahGabunganLt2(${index}, 1)">+</button>
+                </div>
+            `;
+        }
+
+    });
+
+    tampilanMenu += `
+            </div>
+        </div>
+
         <h2 id="totalOrderGabungan">
-    TOTAL: Rp0
-</h2>
-`;
+            TOTAL: Rp0
+        </h2>
 
-tampilanMenu += `
-    <div id="keranjangGabungan">
+        <div id="keranjangGabungan">
+            <h2>🛒 PESANAN ANDA</h2>
+            <div id="daftarPesananGabungan"></div>
+        </div>
 
-        <h2>🛒 PESANAN ANDA</h2>
+        <div id="dataPemesan">
 
-        <div id="daftarPesananGabungan"></div>
+            <h2>👤 DATA PEMESAN</h2>
 
-    </div>
-`;
+            <p>Nama Pelanggan</p>
 
+            <input
+                type="text"
+                id="namaPelanggan"
+                placeholder="Masukkan nama"
+            >
 
-tampilanMenu += `
-    <div id="dataPemesan">
+            <p>Nomor Meja</p>
 
-        <h2>👤 DATA PEMESAN</h2>
+            <input
+                type="text"
+                id="nomorMeja"
+                placeholder="Contoh: 05"
+            >
 
-        <p>Nama Pelanggan</p>
+            <p>Catatan</p>
 
-        <input
-            type="text"
-            id="namaPelanggan"
-            placeholder="Masukkan nama"
-        >
+            <textarea
+                id="catatanPesanan"
+                placeholder="Contoh: Tidak pedas"
+            ></textarea>
 
-        <p>Nomor Meja</p>
+            <br><br>
 
-        <input
-            type="text"
-            id="nomorMeja"
-            placeholder="Contoh: 05"
-        >
+            <button onclick="simpanDataPemesan()">
+                LANJUT
+            </button>
 
-        <p>Catatan</p>
-
-        <textarea
-            id="catatanPesanan"
-            placeholder="Contoh: Tidak pedas"
-        ></textarea>
-
-        <br><br>
-
-        <button onclick="simpanDataPemesan()">
-            LANJUT
-        </button>
-
-    </div>
-`;
+        </div>
+    `;
 
     document.getElementById("menu").innerHTML =
-    tampilanMenu;
+        tampilanMenu;
 
-hitungTotalGabungan();
+    hitungTotalGabungan();
 
-tampilkanKeranjangGabungan();
+    tampilkanKeranjangGabungan();
+
 }
 
 
