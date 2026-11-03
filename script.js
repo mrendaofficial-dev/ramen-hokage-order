@@ -135,6 +135,9 @@ let lantaiPelanggan = "";
 
 let modeOrder = "KUNCI_LANTAI";
 
+// PENGATURAN LANTAI
+const LANTAI2_AKTIF = false;
+
 
 function cekModeOrder() {
 
@@ -155,6 +158,11 @@ function cekModeOrder() {
 
 function pilihLantai() {
 
+    if (!LANTAI2_AKTIF) {
+        setLantaiPelanggan("LT. 1");
+        return;
+    }
+
     document.getElementById("menu").innerHTML = `
 
         <h3>ANDA DUDUK DI LANTAI?</h3>
@@ -169,7 +177,6 @@ function pilihLantai() {
 
     `;
 }
-
 
 function setLantaiPelanggan(lantai) {
 
@@ -218,7 +225,9 @@ function ambilModeDariServer() {
 
             console.timeEnd("waktu respons server");
 
-            modeOrder = data.modeOrder;
+            modeOrder = LANTAI2_AKTIF
+    ? data.modeOrder
+    : "KUNCI_LANTAI";
 
             console.log("Mode dari server:", modeOrder);
 
