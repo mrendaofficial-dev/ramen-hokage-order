@@ -266,8 +266,19 @@ function ambilModeDariServer() {
 
         console.log("Mode dari cache:", modeOrder);
 
-        pilihLantai();
+const waktuMulaiMenu = performance.now();
 
+pilihLantai();
+
+requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+        console.log(
+            "Waktu tampil menu dari cache:",
+            (performance.now() - waktuMulaiMenu).toFixed(2),
+            "ms"
+        );
+    });
+});
     } else {
 
         document.getElementById("menu").innerHTML = `
