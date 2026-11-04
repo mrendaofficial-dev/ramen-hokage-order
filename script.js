@@ -248,38 +248,80 @@ function setLantaiPelanggan(lantai) {
 }
 
 
+
 function ambilModeDariServer() {
 
-       console.time("Waktu memuat pengaturan");
-       document.getElementById("menu").innerHTML = `
-       <h2>⏳ Memuat pengaturan Ramen Hokage...</h2>
-`;  
-       console.time("waktu respons server");  
-       
-       fetch(URL_API)
+    const kunciCache = "modeOrderRamenHokage";
+
+    // BACA MODE TERAKHIR DARI BROWSER
+    const modeTersimpan = localStorage.getItem(kunciCache);
+
+    if (
+        modeTersimpan === "KUNCI_LANTAI" ||
+        modeTersimpan === "GABUNGAN"
+    ) {
+        modeOrder = LANTAI2_AKTIF
+            ? modeTersimpan
+            : "KUNCI_LANTAI";
+
+        console.log("Mode dari cache:", modeOrder);
+
+        pilihLantai();
+
+    } else {
+
+        document.getElementById("menu").innerHTML = `
+            <h2>⏳ Memuat pengaturan Ramen Hokage...</h2>
+        `;
+
+    }
+
+    // AMBIL MODE TERBARU DARI GOOGLE SHEETS
+    fetch(URL_API)
+
         .then(function(response) {
+            if (!response.ok) {
+                throw new Error("Respons server tidak berhasil.");
+            }
+
             return response.json();
         })
 
         .then(function(data) {
 
-            console.timeEnd("waktu respons server");
+            if (
+                data.modeOrder !== "KUNCI_LANTAI" &&
+                data.modeOrder !== "GABUNGAN"
+            ) {
+                throw new Error("Mode dari server tidak valid.");
+            }
 
-            modeOrder = LANTAI2_AKTIF
-    ? data.modeOrder
-    : "KUNCI_LANTAI";
+            // SIMPAN MODE TERBARU KE BROWSER
+            localStorage.setItem(
+                kunciCache,
+                data.modeOrder
+            );
 
-            console.log("Mode dari server:", modeOrder);
+            const modeTerbaru = LANTAI2_AKTIF
+                ? data.modeOrder
+                : "KUNCI_LANTAI";
 
-            console.timeEnd("Waktu memuat pengaturan");
+            console.log("Mode terbaru dari server:", modeTerbaru);
 
-            pilihLantai();
+            // PERBARUI MODE UNTUK PENGGUNAAN BERIKUTNYA
+            modeOrder = modeTerbaru;
+
         })
+
         .catch(function(error) {
 
-            console.log("Gagal mengambil mode:", error);
+            console.log(
+                "Gagal mengambil mode terbaru:",
+                error
+            );
 
         });
+
 }
 
 
