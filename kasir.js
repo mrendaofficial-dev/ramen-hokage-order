@@ -178,7 +178,7 @@ function tampilkanPesanan(pesanan) {
 
 
 
-async function cetakTiket(nomorOrder) {
+async function cetakTiket(nomorOrder, tombol) {
     const order = pesananUntukCetak.find(function(item) {
     return String(item.nomorOrder) === String(nomorOrder);
     });
@@ -187,13 +187,6 @@ async function cetakTiket(nomorOrder) {
         alert("Data pesanan tidak ditemukan. Muat ulang dashboard.");
         return;
     }
-
-    const tombol = Array.from(document.querySelectorAll("button"))
-        .find(function(btn) {
-            return btn.getAttribute("onclick") &&
-                btn.getAttribute("onclick").includes("cetakTiket(") &&
-                btn.getAttribute("onclick").includes(nomorOrder);
-        });
 
     if (tombol && tombol.disabled) return;
 
