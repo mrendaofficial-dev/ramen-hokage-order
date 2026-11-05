@@ -88,12 +88,13 @@ function statusPembayaran(order) {
 
 
 
+
 function tampilkanPesanan(pesanan) {
     pesananUntukCetak = pesanan;
 
     const daftar = document.getElementById("daftarPesanan");
 
-    // Order hanya disembunyikan jika struk kasir sudah berhasil dicetak.
+    // Order disembunyikan jika struk kasir sudah berhasil dicetak.
     const tagihanAktif = pesanan.filter(function(order) {
         const statusCetak = String(order.statusCetakKasir || "BELUM CETAK")
             .trim()
@@ -156,23 +157,19 @@ function tampilkanPesanan(pesanan) {
                 <p class="total">${rupiah(order.total)}</p>
                 <p><b>Metode pembayaran:</b> ${aman(order.metodePembayaran || "-")}</p>
 
+                <button type="button"
+                    onclick="cetakTiket('${aman(nomor)}', this)">
+                    🍜 PESANAN BUAT DAPUR
+                </button>
+
                 ${tombolPembayaran}
+
                 ${statusBayar === "LUNAS" ? `
                 <button type="button"
-                onclick="cetakStrukKasir('${aman(nomor)}')">
-               🧾 CETAK STRUK KASIR
-               </button>
-               ` : ""}
-
-                <button type="button"
-                    onclick="cetakTiket('${aman(nomor)}')">
-                    📱 CETAK VIA CLEANTER
+                    onclick="cetakStrukKasirCleanter('${aman(nomor)}', this)">
+                    🧾 CETAK KASIR
                 </button>
-
-                <button type="button"
-                    onclick="cetakTiketWindows('${aman(nomor)}')">
-                    💻 CETAK VIA WINDOWS
-                </button>
+                ` : ""}
             </article>
         `;
     }).join("");
