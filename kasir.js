@@ -294,13 +294,10 @@ async function cetakTiket(nomorOrder, tombol) {
 
         if (tombol) {
             tombol.disabled = false;
-            tombol.textContent = "🖨️ CETAK TIKET DAPUR";
+            tombol.textContent = "🍜 PESANAN BUAT DAPUR";
         }
     }
 }
-
-
-
 
 async function cetakStrukKasirCleanter(nomorOrder, tombol) {
 
