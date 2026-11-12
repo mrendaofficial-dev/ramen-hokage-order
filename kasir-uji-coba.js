@@ -299,6 +299,7 @@ async function cetakTiket(nomorOrder, tombol) {
     }
 }
 
+
 async function cetakStrukKasirCleanter(nomorOrder, tombol) {
 
     const order = pesananUntukCetak.find(function(item) {
@@ -330,32 +331,91 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
 
     try {
 
+        const formatRp = function(nilai) {
+            return "Rp" + Number(nilai || 0).toLocaleString("id-ID");
+        };
+
+        const rincian = Array.isArray(order.rincianPesanan)
+            ? order.rincianPesanan
+            : [];
+
         const content = [
             { type: "text", text: "RAMEN HOKAGE", align: "center", bold: true },
             { type: "text", text: "STRUK PEMBAYARAN", align: "center", bold: true },
             { type: "divider" },
+
             { type: "text", text: "Order: " + (order.nomorOrder || "-") },
             { type: "text", text: "Waktu: " + (order.waktu || "-") },
             { type: "text", text: "Nama: " + (order.nama || "-") },
             { type: "text", text: "Lantai: " + (order.lantai || "-") },
             { type: "text", text: "Meja: " + (order.meja || "-") },
+
             { type: "divider" },
-            { type: "text", text: "DAFTAR PESANAN", bold: true }
+            { type: "text", text: "RINCIAN PESANAN", bold: true }
         ];
 
-        String(order.daftarPesanan || "-")
-            .split(/\r?\n/)
-            .forEach(function(baris) {
-                content.push({
-                    type: "text",
-                    text: baris || " "
-                });
+        if (rincian.length > 0) {
+
+            rincian.forEach(function(menu) {
+
+                const nama = String(menu.nama || "Menu");
+                const harga = Number(menu.harga || 0);
+                const jumlah = Number(menu.jumlah || 0);
+                const subtotal = Number(menu.subtotal || harga * jumlah);
+
+                content.push(
+                    { type: "text", text: nama, bold: true },
+                    { type: "text", text: jumlah + " x " + formatRp(harga) },
+                    { type: "text", text: "Subtotal: " + formatRp(subtotal) }
+                );
+
             });
+
+        } else {
+
+            content.push({
+                type: "text",
+                text: String(order.daftarPesanan || "-")
+            });
+
+        }
+
+        const total = Number(
+            String(order.total || 0).replace(/[^0-9-]/g, "")
+        );
+
+        const catatanBayar = String(order.catatanPembayaran || "");
+
+        const uangMatch = catatanBayar.match(
+            /Uang diterima:\s*Rp([\d.]+)/i
+        );
+
+        const kembaliMatch = catatanBayar.match(
+            /kembalian:\s*Rp([\d.]+)/i
+        );
+
+        const uangDibayar = uangMatch
+            ? Number(uangMatch[1].replace(/\./g, ""))
+            : 0;
+
+        const kembalian = kembaliMatch
+            ? Number(kembaliMatch[1].replace(/\./g, ""))
+            : 0;
 
         content.push(
             { type: "divider" },
-            { type: "text", text: "TOTAL: " + rupiah(order.total), bold: true },
-            { type: "text", text: "Metode pembayaran: " + (order.metodePembayaran || "-") },
+            { type: "text", text: "TOTAL: " + formatRp(total), bold: true }
+        );
+
+        if (String(order.metodePembayaran).toUpperCase() === "TUNAI") {
+            content.push(
+                { type: "text", text: "Uang diterima: " + formatRp(uangDibayar) },
+                { type: "text", text: "KEMBALIAN: " + formatRp(kembalian), bold: true }
+            );
+        }
+
+        content.push(
+            { type: "text", text: "Metode: " + (order.metodePembayaran || "-") },
             { type: "text", text: "STATUS: LUNAS", bold: true },
             { type: "divider" },
             { type: "text", text: "TERIMA KASIH", align: "center", bold: true },
@@ -398,16 +458,13 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
 
         const yakin = confirm(
             "Cleanter melaporkan proses cetak berhasil.\n\n" +
-            "Apakah struk benar-benar sudah keluar dari printer?"
+            "Apakah struk baru sudah keluar dari printer?"
         );
 
         if (yakin) {
             await konfirmasiCetakKasir(nomorOrder);
         } else {
-            alert(
-                "Status cetak belum dikonfirmasi.\n" +
-                "Periksa printer sebelum mencoba mencetak kembali."
-            );
+            alert("Status cetak belum dikonfirmasi.");
         }
 
     } catch (error) {
