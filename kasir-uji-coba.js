@@ -335,6 +335,9 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
 let rincian = order.rincianPesanan;
 
 // Jika array kosong, coba baca daftarPesanan
+console.log("DATA ORDER UNTUK CETAK:", order);
+console.log("RINCIAN PESANAN:", order.rincianPesanan);
+console.log("DAFTAR PESANAN:", order.daftarPesanan);
 if (!Array.isArray(rincian) || rincian.length === 0) {
     rincian = [];
 
