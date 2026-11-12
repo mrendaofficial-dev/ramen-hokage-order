@@ -419,7 +419,6 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
             { type: "text", text: "STATUS: LUNAS", bold: true },
             { type: "divider" },
             { type: "text", text: "TERIMA KASIH", align: "center", bold: true },
-            { type: "text", text: "SELAMAT MENIKMATI", align: "center" },
             { type: "feed", lines: 3 }
         );
 
