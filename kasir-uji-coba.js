@@ -1,13 +1,13 @@
 
 const URL_API_KASIR =
-    "https://script.google.com/macros/s/AKfycbwe_AcxOXB1EkrrEXxfuOCTB0hv-uasRdtr0Y1M9qgImLh5N5U2-CEQikgPExCOYYsEvw/exec";
+    "https://script.google.com/macros/s/AKfycbzDaeJJoowflT7tBoU1FURlrT7qYE7W0uPq0UDvr-YO2_SLESsIv_eVIyAtVNB1Lyh0/exec";
 
 let suaraAktif = false;
 let audioContext = null;
 let orderAwalSudahDibaca = false;
 let daftarIDSebelumnya = new Set();
 let pesananUntukCetak = [];
-const KUNCI_CACHE_ORDER = "ramenHokageOrderCacheV1";
+const KUNCI_CACHE_ORDER = "ramenHokageOrderCacheUjiCobaV1";
 
 function rupiah(nilai) {
     return "Rp" + Number(
@@ -331,105 +331,147 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
 
     try {
         
-// Membaca rincian menu dari data order
+
+// MEMBACA RINCIAN MENU
 let rincian = order.rincianPesanan;
 
-// Jika array kosong, coba baca daftarPesanan
-console.log("DATA ORDER UNTUK CETAK:", order);
-console.log("RINCIAN PESANAN:", order.rincianPesanan);
-console.log("DAFTAR PESANAN:", order.daftarPesanan);
+// Katalog harga berdasarkan file aplikasi pelanggan
+const katalogHarga = {
+    "Ramen Beef": 16000,
+    "Ramen Katsu": 13000,
+    "Mie Ayam": 10000,
+    "Mie Ayam Baso": 15000,
+    "Baso Sapi 100%": 13000,
+    "Chicken Double Steak": 20000,
+    "Roti Kopi/Manis": 4000,
+    "Dimsum": 13000,
+    "Kentang Goreng": 10000,
+    "Es Teh Manis/Hangat Manis": 4000,
+    "Es Lemon Tea": 5000,
+    "Teh Hangat Tawar": 2000,
+    "Air Mineral": 4000,
+    "Mie Gacoan Ori": 12000,
+    "Mie Gacoan Pedas": 12000,
+    "Baso Malang": 15000,
+    "Mie Yamin": 15000,
+    "Es Teh Manis": 4000,
+    "Es Teh Tawar/Hangat": 2000,
+    "Infuse Water": 3000,
+    "Black Kopi": 10000
+};
+
+// Jika rincian dari server kosong, baca format teks
 if (!Array.isArray(rincian) || rincian.length === 0) {
     rincian = [];
 
     const daftar = String(order.daftarPesanan || "").trim();
 
-    // Coba membaca JSON
+    // Coba format JSON terlebih dahulu
     try {
-        const hasilParse = JSON.parse(daftar);
+        const hasil = JSON.parse(daftar);
+        if (Array.isArray(hasil)) rincian = hasil;
+    } catch (e) {}
 
-        if (Array.isArray(hasilParse)) {
-            rincian = hasilParse;
-        }
-    } catch (e) {
-        // Jika bukan JSON, baca format teks
-    }
+    // Jika bukan JSON, baca format Nama Menu xJumlah
+    if (rincian.length === 0) {
+        daftar.split(/\s*,\s*/).forEach(function(baris) {
+            const cocok = baris.match(/^(.+?)\s*x\s*(\d+)$/i);
 
-    // Membaca format:
-    // Nama Menu | 2 x Rp15.000 = Rp30.000
-    if (rincian.length === 0 && daftar) {
-        daftar.split(/\r?\n/).forEach(function(baris) {
-            const cocok = baris.match(
-                /^(.+?)\s*\|\s*(\d+)\s*x\s*Rp([\d.]+)\s*=\s*Rp([\d.]+)$/i
+            if (!cocok) return;
+
+            const nama = cocok[1].trim();
+            const jumlah = Number(cocok[2]);
+
+            // Cocokkan nama menu tanpa membedakan huruf besar/kecil
+            const namaKatalog = Object.keys(katalogHarga).find(
+                function(item) {
+                    return item.toLowerCase() === nama.toLowerCase();
+                }
             );
 
-            if (cocok) {
-                rincian.push({
-                    nama: cocok[1].trim(),
-                    jumlah: Number(cocok[2]),
-                    harga: Number(cocok[3].replace(/\./g, "")),
-                    subtotal: Number(cocok[4].replace(/\./g, ""))
-                });
+            if (!namaKatalog) {
+                throw new Error("Harga menu tidak ditemukan: " + nama);
             }
+
+            const harga = katalogHarga[namaKatalog];
+
+            rincian.push({
+                nama: namaKatalog,
+                harga: harga,
+                jumlah: jumlah,
+                subtotal: harga * jumlah
+            });
         });
     }
 }
 
-// Pastikan rincian benar-benar tersedia
 if (!Array.isArray(rincian) || rincian.length === 0) {
-    throw new Error(
-        "Data rincian menu tidak ditemukan atau formatnya belum dikenali: " +
-        String(order.daftarPesanan || "-")
-    );
+    throw new Error("Rincian menu tidak berhasil dibaca.");
 }
 
-        // Nama menu, harga satuan, jumlah, dan subtotal
-        rincian.forEach(function(menu) {
-            const nama = String(menu.nama || "-");
-            const harga = Number(menu.harga || 0);
-            const jumlah = Number(menu.jumlah || 0);
-            const subtotal = Number(menu.subtotal || (harga * jumlah));
+// MEMBANGUN ISI STRUK
+const content = [
+    { type: "text", text: "RAMEN HOKAGE", align: "center", bold: true },
+    { type: "text", text: "STRUK PEMBAYARAN", align: "center", bold: true },
+    { type: "divider" },
+    { type: "text", text: "Order: " + (order.nomorOrder || "-") },
+    { type: "text", text: "Waktu: " + (order.waktu || "-") },
+    { type: "text", text: "Nama: " + (order.nama || "-") },
+    { type: "text", text: "Lantai: " + (order.lantai || "-") },
+    { type: "text", text: "Meja: " + (order.meja || "-") },
+    { type: "divider" },
+    { type: "text", text: "DAFTAR PESANAN", bold: true }
+];
 
-            content.push(
-                { type: "text", text: nama, bold: true },
-                { type: "text", text: jumlah + " x " + rupiah(harga) },
-                { type: "text", text: "Subtotal: " + rupiah(subtotal) }
-            );
-        });
+// Cetak rincian setiap menu
+rincian.forEach(function(menu) {
+    const harga = Number(menu.harga);
+    const jumlah = Number(menu.jumlah);
+    const subtotal = Number(menu.subtotal);
 
-        // Membaca uang tunai dan kembalian dari catatan pembayaran
-        const catatanBayar = String(order.catatanPembayaran || "");
+    if (!menu.nama || harga <= 0 || jumlah <= 0 ||
+        subtotal !== harga * jumlah) {
+        throw new Error("Rincian menu tidak valid: " + menu.nama);
+    }
 
-        const uangMatch = catatanBayar.match(/Uang diterima:\s*Rp([\d.]+)/i);
-        const kembaliMatch = catatanBayar.match(/kembalian:\s*Rp([\d.]+)/i);
+    content.push(
+        { type: "text", text: menu.nama, bold: true },
+        { type: "text", text: jumlah + " x " + rupiah(harga) },
+        { type: "text", text: "Subtotal: " + rupiah(subtotal) }
+    );
+});
 
-        const contentTambahan = [
-            { type: "divider" },
-            { type: "text", text: "TOTAL: " + rupiah(order.total), bold: true }
-        ];
+// Pembayaran
+const catatanBayar = String(order.catatanPembayaran || "");
+const uangMatch = catatanBayar.match(/Uang diterima:\s*Rp([\d.]+)/i);
+const kembaliMatch = catatanBayar.match(/kembalian:\s*Rp([\d.]+)/i);
 
-        if (uangMatch) {
-            contentTambahan.push({
-                type: "text",
-                text: "Uang diterima: Rp" + uangMatch[1]
-            });
-        }
+content.push(
+    { type: "divider" },
+    { type: "text", text: "TOTAL: " + rupiah(order.total), bold: true }
+);
 
-        if (kembaliMatch) {
-            contentTambahan.push({
-                type: "text",
-                text: "Kembalian: Rp" + kembaliMatch[1]
-            });
-        }
+if (uangMatch) {
+    content.push({
+        type: "text",
+        text: "Uang diterima: Rp" + uangMatch[1]
+    });
+}
 
-        contentTambahan.push(
-            { type: "text", text: "Metode: " + (order.metodePembayaran || "-") },
-            { type: "text", text: "STATUS: LUNAS", bold: true },
-            { type: "divider" },
-            { type: "text", text: "TERIMA KASIH", align: "center", bold: true },
-            { type: "feed", lines: 3 }
-        );
+if (kembaliMatch) {
+    content.push({
+        type: "text",
+        text: "Kembalian: Rp" + kembaliMatch[1]
+    });
+}
 
-        content.push(...contentTambahan);
+content.push(
+    { type: "text", text: "Metode: " + (order.metodePembayaran || "-") },
+    { type: "text", text: "STATUS: LUNAS", bold: true },
+    { type: "divider" },
+    { type: "text", text: "TERIMA KASIH", align: "center", bold: true },
+    { type: "feed", lines: 3 }
+);
 
         const response = await fetch("http://localhost:9100/print", {
             method: "POST",
@@ -791,8 +833,7 @@ setInterval(function() {
 
 
 const URL_API_PEMBAYARAN =
-    "https://script.google.com/macros/s/AKfycbwJXTsIfaj6ui_xtXuDA2iGlXVMJRrjO_k36rF4eeEmngVRQKOeR_CQZRpiu_F1A1dcbA/exec";
-
+    "https://script.google.com/macros/s/AKfycbzDaeJJoowflT7tBoU1FURlrT7qYE7W0uPq0UDvr-YO2_SLESsIv_eVIyAtVNB1Lyh0/exec";
 async function cekStatusPembayaran(nomorOrder) {
     const url = URL_API_PEMBAYARAN +
         "?action=statusPembayaran&nomorOrder=" +
