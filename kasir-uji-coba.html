@@ -4,15 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kasir Ramen Hokage</title>
+    <title>Kasir Ramen Hokage - Uji Coba</title>
+
+    <!-- Menggunakan CSS produksi, tanpa mengubahnya -->
     <link rel="stylesheet" href="kasir.css?v=1">
 </head>
 <body>
 
     <header class="header">
         <h1>🍜 RAMEN HOKAGE</h1>
-        <h2>DASHBOARD KASIR</h2>
-        <p id="statusKoneksi">Menghubungkan ke server...</p>
+        <h2>DASHBOARD KASIR - UJI COBA</h2>
+        <p id="statusKoneksi">Menghubungkan ke server uji coba...</p>
     </header>
 
     <main>
@@ -20,132 +22,141 @@
             <button id="btnSuara" onclick="aktifkanSuara()">
                 🔔 AKTIFKAN SUARA
             </button>
+
             <button onclick="ambilPesanan(true)">
                 🔄 SEGARKAN
             </button>
         </div>
+
         <section id="panelKontrolKedai" style="
-    background:#222;
-    border:1px solid #ffcc00;
-    border-radius:12px;
-    padding:18px;
-    margin-bottom:22px;
-    text-align:center;
-">
+            background:#222;
+            border:1px solid #ffcc00;
+            border-radius:12px;
+            padding:18px;
+            margin-bottom:22px;
+            text-align:center;
+        ">
 
-    <h2 style="color:#ffcc00; margin-top:0;">
-        🔐 KONTROL OPERASIONAL KEDAI
-    </h2>
+            <h2 style="color:#ffcc00; margin-top:0;">
+                🔐 KONTROL OPERASIONAL KEDAI
+            </h2>
 
-    <p id="statusKedaiDashboard" style="color:#ccc;">
-        Memeriksa status kedai...
-    </p>
+            <p id="statusKedaiDashboard" style="color:#ccc;">
+                Memeriksa status kedai...
+            </p>
 
-    <div style="max-width:320px; margin:auto;">
+            <div style="max-width:320px; margin:auto;">
+                <input
+                    type="password"
+                    id="pinKasirDashboard"
+                    inputmode="numeric"
+                    maxlength="6"
+                    pattern="[0-9]{6}"
+                    placeholder="Masukkan PIN Kasir 6 digit"
+                    autocomplete="off"
+                    style="
+                        width:100%;
+                        padding:13px;
+                        margin:10px 0;
+                        border-radius:8px;
+                        border:1px solid #777;
+                        font-size:18px;
+                        text-align:center;
+                        letter-spacing:5px;
+                    "
+                >
 
-        <input
-            type="password"
-            id="pinKasirDashboard"
-            inputmode="numeric"
-            maxlength="6"
-            pattern="[0-9]{6}"
-            placeholder="Masukkan PIN Kasir 6 digit"
-            autocomplete="off"
-            style="
-                width:100%;
-                padding:13px;
-                margin:10px 0;
-                border-radius:8px;
-                border:1px solid #777;
-                font-size:18px;
-                text-align:center;
-                letter-spacing:5px;
-            "
-        >
+                <button
+                    type="button"
+                    id="btnBukaKedai"
+                    onclick="bukaKedaiDashboard()"
+                    style="width:100%; margin:6px 0; background:#198754; color:white;"
+                >
+                    🔓 BUKA KEDAI
+                </button>
 
-        <button
-            type="button"
-            id="btnBukaKedai"
-            onclick="bukaKedaiDashboard()"
-            style="width:100%; margin:6px 0; background:#198754; color:white;"
-        >
-            🔓 BUKA KEDAI
-        </button>
+                <button
+                    type="button"
+                    id="btnTutupKedai"
+                    onclick="tutupKedaiDashboard()"
+                    style="width:100%; margin:6px 0; background:#dc3545; color:white;"
+                >
+                    🔒 TUTUP KEDAI
+                </button>
+            </div>
 
-        <button
-            type="button"
-            id="btnTutupKedai"
-            onclick="tutupKedaiDashboard()"
-            style="width:100%; margin:6px 0; background:#dc3545; color:white;"
-        >
-            🔒 TUTUP KEDAI
-        </button>
+            <div id="tampilanKodeAkses" style="
+                display:none;
+                margin-top:18px;
+                padding:15px;
+                background:#111;
+                border:1px dashed #ffcc00;
+                border-radius:10px;
+            ">
+                <p style="color:#ffcc00; margin:0;">
+                    KODE AKSES PELANGGAN HARI INI
+                </p>
 
-    </div>
+                <strong
+                    id="kodeAksesPelanggan"
+                    style="
+                        display:block;
+                        font-size:38px;
+                        letter-spacing:10px;
+                        color:#fff;
+                        margin:10px 0;
+                    "
+                >----</strong>
 
-    <div id="tampilanKodeAkses" style="
-        display:none;
-        margin-top:18px;
-        padding:15px;
-        background:#111;
-        border:1px dashed #ffcc00;
-        border-radius:10px;
-    ">
-
-        <p style="color:#ffcc00; margin:0;">
-            KODE AKSES PELANGGAN HARI INI
-        </p>
-
-        <strong
-            id="kodeAksesPelanggan"
-            style="
-                display:block;
-                font-size:38px;
-                letter-spacing:10px;
-                color:#fff;
-                margin:10px 0;
-            "
-        >----</strong>
-
-        <p style="color:#aaa; font-size:12px; margin-bottom:0;">
-            Berikan kode ini kepada pelanggan untuk melakukan pemesanan.
-        </p>
-
-    </div>
-
-</section>
+                <p style="color:#aaa; font-size:12px; margin-bottom:0;">
+                    Kode akses untuk pengujian.
+                </p>
+            </div>
+        </section>
 
         <section class="ringkasan">
             <div class="kotak">
                 <span>ORDER BARU</span>
                 <strong id="jumlahBaru">0</strong>
             </div>
+
             <div class="kotak">
                 <span>DIPROSES</span>
                 <strong id="jumlahProses">0</strong>
             </div>
+
             <div class="kotak">
                 <span>SELESAI</span>
                 <strong id="jumlahSelesai">0</strong>
             </div>
         </section>
 
-        <h2>📋 DAFTAR PESANAN</h2>
+        <h2>📋 DAFTAR PESANAN UJI COBA</h2>
+
         <div id="daftarPesanan">
             <p>Memuat pesanan...</p>
         </div>
     </main>
 
-    <script src="kasir.js?v=1"></script>
-    
-<div style="padding: 12px; text-align: center;">
-  <button
-    type="button"
-    onclick="tesServerCleanter()"
-    style="padding: 12px; background: #f0c419; color: #111; border: 0; border-radius: 8px; font-weight: bold;">
-    TES KONEKSI CLEANTER
-  </button>
-</div>
+    <!-- Memanggil JavaScript khusus pengujian -->
+    <script src="kasir-uji-coba.js?v=1"></script>
+
+    <div style="padding:12px; text-align:center;">
+        <button
+            type="button"
+            onclick="tesServerCleanter()"
+            style="
+                padding:12px;
+                background:#f0c419;
+                color:#111;
+                border:0;
+                border-radius:8px;
+                font-weight:bold;
+            "
+        >
+            TES KONEKSI CLEANTER
+        </button>
+    </div>
 
 </body>
 </html>
