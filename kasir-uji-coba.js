@@ -300,6 +300,7 @@ async function cetakTiket(nomorOrder, tombol) {
 }
 
 
+
 async function cetakStrukKasirCleanter(nomorOrder, tombol) {
 
     const order = pesananUntukCetak.find(function(item) {
@@ -324,103 +325,87 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
     }
 
     const pengendali = new AbortController();
-
     const batasWaktu = setTimeout(function() {
         pengendali.abort();
     }, 45000);
 
     try {
+        // Membaca rincian menu dari data order
+        let rincian = order.rincianPesanan;
 
-        const formatRp = function(nilai) {
-            return "Rp" + Number(nilai || 0).toLocaleString("id-ID");
-        };
+        if (!Array.isArray(rincian)) {
+            try {
+                rincian = JSON.parse(order.daftarPesanan || "[]");
+            } catch (e) {
+                rincian = [];
+            }
+        }
 
-        const rincian = Array.isArray(order.rincianPesanan)
-            ? order.rincianPesanan
-            : [];
+        if (!Array.isArray(rincian) || rincian.length === 0) {
+            throw new Error("Rincian menu tidak tersedia. Struk tidak dicetak.");
+        }
 
         const content = [
             { type: "text", text: "RAMEN HOKAGE", align: "center", bold: true },
             { type: "text", text: "STRUK PEMBAYARAN", align: "center", bold: true },
             { type: "divider" },
-
             { type: "text", text: "Order: " + (order.nomorOrder || "-") },
             { type: "text", text: "Waktu: " + (order.waktu || "-") },
             { type: "text", text: "Nama: " + (order.nama || "-") },
             { type: "text", text: "Lantai: " + (order.lantai || "-") },
             { type: "text", text: "Meja: " + (order.meja || "-") },
-
             { type: "divider" },
-            { type: "text", text: "RINCIAN PESANAN", bold: true }
+            { type: "text", text: "DAFTAR PESANAN", bold: true }
         ];
 
-        if (rincian.length > 0) {
+        // Nama menu, harga satuan, jumlah, dan subtotal
+        rincian.forEach(function(menu) {
+            const nama = String(menu.nama || "-");
+            const harga = Number(menu.harga || 0);
+            const jumlah = Number(menu.jumlah || 0);
+            const subtotal = Number(menu.subtotal || (harga * jumlah));
 
-            rincian.forEach(function(menu) {
+            content.push(
+                { type: "text", text: nama, bold: true },
+                { type: "text", text: jumlah + " x " + rupiah(harga) },
+                { type: "text", text: "Subtotal: " + rupiah(subtotal) }
+            );
+        });
 
-                const nama = String(menu.nama || "Menu");
-                const harga = Number(menu.harga || 0);
-                const jumlah = Number(menu.jumlah || 0);
-                const subtotal = Number(menu.subtotal || harga * jumlah);
-
-                content.push(
-                    { type: "text", text: nama, bold: true },
-                    { type: "text", text: jumlah + " x " + formatRp(harga) },
-                    { type: "text", text: "Subtotal: " + formatRp(subtotal) }
-                );
-
-            });
-
-        } else {
-
-            content.push({
-                type: "text",
-                text: String(order.daftarPesanan || "-")
-            });
-
-        }
-
-        const total = Number(
-            String(order.total || 0).replace(/[^0-9-]/g, "")
-        );
-
+        // Membaca uang tunai dan kembalian dari catatan pembayaran
         const catatanBayar = String(order.catatanPembayaran || "");
 
-        const uangMatch = catatanBayar.match(
-            /Uang diterima:\s*Rp([\d.]+)/i
-        );
+        const uangMatch = catatanBayar.match(/Uang diterima:\s*Rp([\d.]+)/i);
+        const kembaliMatch = catatanBayar.match(/kembalian:\s*Rp([\d.]+)/i);
 
-        const kembaliMatch = catatanBayar.match(
-            /kembalian:\s*Rp([\d.]+)/i
-        );
-
-        const uangDibayar = uangMatch
-            ? Number(uangMatch[1].replace(/\./g, ""))
-            : 0;
-
-        const kembalian = kembaliMatch
-            ? Number(kembaliMatch[1].replace(/\./g, ""))
-            : 0;
-
-        content.push(
+        const contentTambahan = [
             { type: "divider" },
-            { type: "text", text: "TOTAL: " + formatRp(total), bold: true }
-        );
+            { type: "text", text: "TOTAL: " + rupiah(order.total), bold: true }
+        ];
 
-        if (String(order.metodePembayaran).toUpperCase() === "TUNAI") {
-            content.push(
-                { type: "text", text: "Uang diterima: " + formatRp(uangDibayar) },
-                { type: "text", text: "KEMBALIAN: " + formatRp(kembalian), bold: true }
-            );
+        if (uangMatch) {
+            contentTambahan.push({
+                type: "text",
+                text: "Uang diterima: Rp" + uangMatch[1]
+            });
         }
 
-        content.push(
+        if (kembaliMatch) {
+            contentTambahan.push({
+                type: "text",
+                text: "Kembalian: Rp" + kembaliMatch[1]
+            });
+        }
+
+        contentTambahan.push(
             { type: "text", text: "Metode: " + (order.metodePembayaran || "-") },
             { type: "text", text: "STATUS: LUNAS", bold: true },
             { type: "divider" },
             { type: "text", text: "TERIMA KASIH", align: "center", bold: true },
             { type: "feed", lines: 3 }
         );
+
+        content.push(...contentTambahan);
 
         const response = await fetch("http://localhost:9100/print", {
             method: "POST",
@@ -437,7 +422,6 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
         });
 
         const teksHasil = await response.text();
-
         let hasil = {};
 
         try {
@@ -457,17 +441,19 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
 
         const yakin = confirm(
             "Cleanter melaporkan proses cetak berhasil.\n\n" +
-            "Apakah struk baru sudah keluar dari printer?"
+            "Apakah struk benar-benar sudah keluar dari printer?"
         );
 
         if (yakin) {
             await konfirmasiCetakKasir(nomorOrder);
         } else {
-            alert("Status cetak belum dikonfirmasi.");
+            alert(
+                "Status cetak belum dikonfirmasi.\n" +
+                "Periksa printer sebelum mencoba mencetak kembali."
+            );
         }
 
     } catch (error) {
-
         console.error("Diagnostik cetak struk kasir:", error);
 
         const pesan = error.name === "AbortError"
@@ -477,7 +463,6 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
         alert("STRUK BELUM TERCETAK\n\n" + pesan);
 
     } finally {
-
         clearTimeout(batasWaktu);
 
         if (tombol) {
