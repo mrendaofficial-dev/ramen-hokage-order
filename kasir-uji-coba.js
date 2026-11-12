@@ -330,33 +330,54 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
     }, 45000);
 
     try {
-        // Membaca rincian menu dari data order
-        let rincian = order.rincianPesanan;
+        
+// Membaca rincian menu dari data order
+let rincian = order.rincianPesanan;
 
-        if (!Array.isArray(rincian)) {
-            try {
-                rincian = JSON.parse(order.daftarPesanan || "[]");
-            } catch (e) {
-                rincian = [];
+// Jika array kosong, coba baca daftarPesanan
+if (!Array.isArray(rincian) || rincian.length === 0) {
+    rincian = [];
+
+    const daftar = String(order.daftarPesanan || "").trim();
+
+    // Coba membaca JSON
+    try {
+        const hasilParse = JSON.parse(daftar);
+
+        if (Array.isArray(hasilParse)) {
+            rincian = hasilParse;
+        }
+    } catch (e) {
+        // Jika bukan JSON, baca format teks
+    }
+
+    // Membaca format:
+    // Nama Menu | 2 x Rp15.000 = Rp30.000
+    if (rincian.length === 0 && daftar) {
+        daftar.split(/\r?\n/).forEach(function(baris) {
+            const cocok = baris.match(
+                /^(.+?)\s*\|\s*(\d+)\s*x\s*Rp([\d.]+)\s*=\s*Rp([\d.]+)$/i
+            );
+
+            if (cocok) {
+                rincian.push({
+                    nama: cocok[1].trim(),
+                    jumlah: Number(cocok[2]),
+                    harga: Number(cocok[3].replace(/\./g, "")),
+                    subtotal: Number(cocok[4].replace(/\./g, ""))
+                });
             }
-        }
+        });
+    }
+}
 
-        if (!Array.isArray(rincian) || rincian.length === 0) {
-            throw new Error("Rincian menu tidak tersedia. Struk tidak dicetak.");
-        }
-
-        const content = [
-            { type: "text", text: "RAMEN HOKAGE", align: "center", bold: true },
-            { type: "text", text: "STRUK PEMBAYARAN", align: "center", bold: true },
-            { type: "divider" },
-            { type: "text", text: "Order: " + (order.nomorOrder || "-") },
-            { type: "text", text: "Waktu: " + (order.waktu || "-") },
-            { type: "text", text: "Nama: " + (order.nama || "-") },
-            { type: "text", text: "Lantai: " + (order.lantai || "-") },
-            { type: "text", text: "Meja: " + (order.meja || "-") },
-            { type: "divider" },
-            { type: "text", text: "DAFTAR PESANAN", bold: true }
-        ];
+// Pastikan rincian benar-benar tersedia
+if (!Array.isArray(rincian) || rincian.length === 0) {
+    throw new Error(
+        "Data rincian menu tidak ditemukan atau formatnya belum dikenali: " +
+        String(order.daftarPesanan || "-")
+    );
+}
 
         // Nama menu, harga satuan, jumlah, dan subtotal
         rincian.forEach(function(menu) {
