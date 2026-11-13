@@ -229,7 +229,7 @@ async function cetakTiket(nomorOrder, tombol) {
             { type: "text", text: order.catatan || "-" },
             { type: "divider" },
             { type: "text", text: "MOHON DIPROSES", align: "center", bold: true },
-            );
+        );
 
         const response = await fetch("http://localhost:9100/print", {
             method: "POST",
@@ -485,7 +485,7 @@ content.push(
     { type: "text", text: "STATUS: LUNAS", bold: true },
     { type: "divider" },
     { type: "text", text: "TERIMA KASIH", align: "center", bold: true },
-    );
+);
 
         const response = await fetch("http://localhost:9100/print", {
             method: "POST",
