@@ -332,6 +332,7 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
     try {
         
 
+
 // MEMBACA RINCIAN MENU
 let rincian = order.rincianPesanan;
 
@@ -382,7 +383,6 @@ if (!Array.isArray(rincian) || rincian.length === 0) {
             const nama = cocok[1].trim();
             const jumlah = Number(cocok[2]);
 
-            // Cocokkan nama menu tanpa membedakan huruf besar/kecil
             const namaKatalog = Object.keys(katalogHarga).find(
                 function(item) {
                     return item.toLowerCase() === nama.toLowerCase();
@@ -434,14 +434,30 @@ rincian.forEach(function(menu) {
         throw new Error("Rincian menu tidak valid: " + menu.nama);
     }
 
-    content.push(
-        { type: "text", text: menu.nama, bold: true },
-        { type: "text", text: jumlah + " x " + rupiah(harga) },
-        { type: "text", text: "Subtotal: " + rupiah(subtotal) }
-    );
+    // Nama menu di kiri dan subtotal item di kanan
+    const namaMenuCetak = String(menu.nama);
+    const hargaCetak = rupiah(subtotal).padStart(10, " ");
+
+    if (namaMenuCetak.length <= 22) {
+        content.push({
+            type: "text",
+            text: namaMenuCetak.padEnd(22, " ") + hargaCetak,
+            bold: true
+        });
+    } else {
+        content.push(
+            { type: "text", text: namaMenuCetak, bold: true },
+            { type: "text", text: hargaCetak, align: "right", bold: true }
+        );
+    }
+
+    content.push({
+        type: "text",
+        text: jumlah + " x " + rupiah(harga)
+    });
 });
 
-// Pembayaran
+// PEMBAYARAN
 const catatanBayar = String(order.catatanPembayaran || "");
 const uangMatch = catatanBayar.match(/Uang diterima:\s*Rp([\d.]+)/i);
 const kembaliMatch = catatanBayar.match(/kembalian:\s*Rp([\d.]+)/i);
@@ -470,7 +486,7 @@ content.push(
     { type: "text", text: "STATUS: LUNAS", bold: true },
     { type: "divider" },
     { type: "text", text: "TERIMA KASIH", align: "center", bold: true },
-    { type: "feed", lines: 3 }
+    { type: "feed", lines: 1 }
 );
 
         const response = await fetch("http://localhost:9100/print", {
