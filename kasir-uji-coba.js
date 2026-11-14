@@ -103,18 +103,17 @@ function tampilkanPesanan(pesanan) {
         return statusCetak !== "SUDAH CETAK";
     });
 
-    const jumlahBaru = tagihanAktif.filter(function(order) {
-        return String(order.statusOrder || "").trim().toUpperCase() === "BARU";
-    }).length;
+    const jumlahBaru = pesanan.filter(function(order) {
+    return String(order.statusOrder || "").trim().toUpperCase() === "BARU";
+}).length;
 
-    const jumlahProses = tagihanAktif.filter(function(order) {
-        return String(order.statusOrder || "").trim().toUpperCase() === "DIPROSES";
-    }).length;
+const jumlahProses = pesanan.filter(function(order) {
+    return String(order.statusOrder || "").trim().toUpperCase() === "DIPROSES";
+}).length;
 
-    const jumlahSelesai = tagihanAktif.filter(function(order) {
-        return String(order.statusOrder || "").trim().toUpperCase() === "SELESAI";
-    }).length;
-
+const jumlahSelesai = pesanan.filter(function(order) {
+    return String(order.statusOrder || "").trim().toUpperCase() === "SELESAI";
+}).length;
     document.getElementById("jumlahBaru").textContent = jumlahBaru;
     document.getElementById("jumlahProses").textContent = jumlahProses;
     document.getElementById("jumlahSelesai").textContent = jumlahSelesai;
@@ -175,6 +174,54 @@ function tampilkanPesanan(pesanan) {
     }).join("");
 }
 
+
+async function konfirmasiPesananDapur(nomorOrder) {
+    await fetch(URL_API_KASIR, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+            "Content-Type": "text/plain;charset=UTF-8"
+        },
+        body: JSON.stringify({
+            action: "konfirmasiPesananDapur",
+            nomorOrder: nomorOrder
+        })
+    });
+
+    let berhasil = false;
+
+    for (let i = 0; i < 8; i++) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const response = await fetch(
+            URL_API_KASIR + "?action=pesananKasir&t=" + Date.now(),
+            { cache: "no-store" }
+        );
+
+        const data = await response.json();
+
+        const orderTerbaru = (data.pesanan || []).find(function(item) {
+            return String(item.nomorOrder) === String(nomorOrder);
+        });
+
+        if (
+            orderTerbaru &&
+            String(orderTerbaru.statusOrder || "")
+                .trim().toUpperCase() === "DIPROSES"
+        ) {
+            berhasil = true;
+            break;
+        }
+    }
+
+    if (!berhasil) {
+        throw new Error(
+            "Tiket mungkin sudah tercetak, tetapi status DIPROSES belum terverifikasi. Jangan cetak ulang dahulu."
+        );
+    }
+
+    await ambilPesanan();
+}
 
 
 
@@ -261,8 +308,13 @@ async function cetakTiket(nomorOrder, tombol) {
             );
         }
 
-        alert("Tiket berhasil dikirim ke printer.\nOrder: " +
-            order.nomorOrder);
+        await konfirmasiPesananDapur(nomorOrder);
+
+alert(
+    "TIKET DAPUR BERHASIL DICETAK!\n" +
+    "Status pesanan: DIPROSES\n" +
+    "Order: " + nomorOrder
+);
 
     } catch (error) {
         console.error("Diagnostik cetak:", error);
@@ -595,11 +647,14 @@ async function konfirmasiCetakKasir(nomorOrder) {
             });
 
             if (
-                terbaru &&
-                String(terbaru.statusCetakKasir || "")
-                    .trim()
-                    .toUpperCase() === "SUDAH CETAK"
-            ) {
+    terbaru &&
+    String(terbaru.statusCetakKasir || "")
+        .trim()
+        .toUpperCase() === "SUDAH CETAK" &&
+    String(terbaru.statusOrder || "")
+        .trim()
+        .toUpperCase() === "SELESAI"
+) {
                 sudahTercatat = true;
                 break;
             }
