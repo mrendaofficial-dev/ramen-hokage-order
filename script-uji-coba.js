@@ -349,7 +349,7 @@ function tampilLantai1() {
             <div class="menu-container">
     `;
 
-    for (let index = 0; index <= 8; index++) {
+    for (let index = 0; index <= 18; index++) {
 
         let menu = menuLt1[index];
 
@@ -385,7 +385,7 @@ function tampilLantai1() {
             <div class="menu-container">
     `;
 
-    for (let index = 9; index <= 12; index++) {
+    for (let index = 19; index <= 28; index++) {
 
         let menu = menuLt1[index];
 
