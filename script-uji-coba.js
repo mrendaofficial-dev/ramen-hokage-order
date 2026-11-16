@@ -1346,121 +1346,112 @@ function tampilkanPesananKonfirmasi() {
 
 function kirimOrder() {
 
-    let nomorOrder =
-        "RH-" + Date.now();
+    // PERIKSA STATUS KEDAI TERLEBIH DAHULU
+    fetch(URL_API + "?action=statusKedai", {
+        method: "GET",
+        cache: "no-store"
+    })
+    .then(function(response) {
 
+        if (!response.ok) {
+            throw new Error("Tidak dapat membaca status kedai.");
+        }
 
-let daftarPesanan = [];
+        return response.json();
+    })
+    .then(function(status) {
 
-let pesananLt1 =
-    ambilPesananLt1();
+        // JIKA KEDAI TUTUP, JANGAN KIRIM PESANAN
+        if (
+            status.status !== "success" ||
+            status.kedaiAktif !== true
+        ) {
+            alert(
+                "MAAF, KEDAI SEDANG TUTUP.\n\n" +
+                "Pesanan belum dapat diterima."
+            );
 
-let pesananLt2 =
-    ambilPesananLt2();
+            return;
+        }
 
-daftarPesanan =
-    pesananLt1.concat(pesananLt2);
+        // SUSUN DATA PESANAN
+        let nomorOrder = "RH-" + Date.now();
 
-let total = 0;
+        let pesananLt1 = ambilPesananLt1();
+        let pesananLt2 = ambilPesananLt2();
 
-daftarPesanan.forEach(function(menu) {
+        let daftarPesanan =
+            pesananLt1.concat(pesananLt2);
 
-    total =
-        total + menu.subtotal;
-});
-   
-let dataOrder = {
+        if (daftarPesanan.length === 0) {
+            alert("Silakan pilih minimal 1 menu.");
+            return;
+        }
 
-    nomorOrder: nomorOrder,
+        let total = 0;
 
-    nama: dataNama,
+        daftarPesanan.forEach(function(menu) {
+            total += menu.subtotal;
+        });
 
-    meja: dataMeja,
+        let dataOrder = {
+            nomorOrder: nomorOrder,
+            nama: dataNama,
+            meja: dataMeja,
+            lantaiPelanggan: lantaiPelanggan,
+            catatan: dataCatatan,
+            pesanan: daftarPesanan,
+            total: total,
+            statusOrder: "BARU"
+        };
 
-    lantaiPelanggan: lantaiPelanggan,
+        // KIRIM PESANAN KE CORE
+        return fetch(URL_API, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(dataOrder)
+        })
+        .then(function() {
 
-    catatan: dataCatatan,
+            document.getElementById("menu").innerHTML = `
+                <div id="orderBerhasil">
 
-    pesanan: daftarPesanan,
+                    <h2>📨 PERMINTAAN ORDER TERKIRIM</h2>
 
-    total: total,
+                    <p>
+                        Nomor Order:
+                        <strong>${nomorOrder}</strong>
+                    </p>
 
-    statusOrder: "BARU"
-};
+                    <p>
+                        Permintaan sudah dikirim.
+                        Silakan tunggu konfirmasi kasir.
+                    </p>
 
+                    <p>
+                        Catatan: status penerimaan harus
+                        dipastikan melalui dashboard kasir.
+                    </p>
 
-console.log("Lantai pelanggan:", lantaiPelanggan);
-console.log("Data order:", dataOrder);
+                </div>
+            `;
+        });
 
+    })
+    .catch(function(error) {
 
-fetch(URL_API, {
+        console.log("Gagal memeriksa atau mengirim order:", error);
 
-    method: "POST",
+        alert(
+            "TIDAK DAPAT MEMERIKSA STATUS KEDAI.\n\n" +
+            "Pesanan belum dapat dipastikan terkirim. " +
+            "Silakan coba kembali."
+        );
 
-    mode: "no-cors",
-
-    body: JSON.stringify(dataOrder)
-
-})
-.then(function() {
-
-    console.log(
-        "Permintaan order sudah dikirim ke Google Sheets."
-    );
-
-    document.getElementById("menu").innerHTML = `
-    <div id="orderBerhasil">
-
-        <h2>✅ ORDER BERHASIL DIKIRIM!</h2>
-
-        <p>
-            Nomor Order:
-            <strong>${nomorOrder}</strong>
-        </p>
-
-        <p>
-            Nama:
-            <strong>${dataNama}</strong>
-        </p>
-
-        <p>
-            Meja:
-            <strong>${dataMeja}</strong>
-        </p>
-
-        <h2>
-            TOTAL: Rp${total.toLocaleString("id-ID")}
-        </h2>
-
-        <p>
-            Terima kasih sudah memesan di Ramen Hokage!
-        </p>
-
-        <button
-            class="btn-pesan-lagi"
-            onclick="pesanLagi()">
-            🍜 PESAN LAGI
-        </button>
-
-    </div>
-`;
-
-})
-.catch(function(error) {
-
-    console.log(
-        "Gagal mengirim order:",
-        error
-    );
-
-    alert(
-        "ORDER GAGAL DIKIRIM!\n\n" +
-        "Silakan coba lagi."
-    );
-
-});
+    });
 
 }
+
 
 
 function pesanLagi() {
