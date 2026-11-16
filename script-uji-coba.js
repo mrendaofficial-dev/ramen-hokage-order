@@ -1500,7 +1500,7 @@ document.getElementById("menu").innerHTML = `
         </p>
 
         <p>
-            Terima kasih, kawan.
+            Terima kasih kawan,
             Semoga harimu menyenangkan! 😊
         </p>
 
