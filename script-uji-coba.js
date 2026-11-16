@@ -1482,30 +1482,31 @@ function kirimOrder() {
 
         .then(function() {
 
-            document.getElementById("menu").innerHTML = `
+            
+document.getElementById("menu").innerHTML = `
 
-                <div id="orderBerhasil">
+    <div id="orderBerhasil">
 
-                    <h2>📨 PERMINTAAN ORDER TERKIRIM</h2>
+        <h2>📨 PERMINTAAN ORDER TERKIRIM</h2>
 
-                    <p>
-                        Nomor Order:
-                        <strong>${nomorOrder}</strong>
-                    </p>
+        <p>
+            Nomor Order:
+            <strong>${nomorOrder}</strong>
+        </p>
 
-                    <p>
-                        Permintaan sudah dikirim.
-                        Silakan tunggu konfirmasi kasir.
-                    </p>
+        <p>
+            Permintaan sudah dikirim.
+            Orderan akan dikerjakan sesuai dengan nomor antrian.
+        </p>
 
-                    <p>
-                        Penerimaan pesanan dipastikan
-                        melalui dashboard kasir.
-                    </p>
+        <p>
+            Terima kasih, kawan.
+            Semoga harimu menyenangkan! 😊
+        </p>
 
-                </div>
+    </div>
 
-            `;
+`;
 
         });
 
