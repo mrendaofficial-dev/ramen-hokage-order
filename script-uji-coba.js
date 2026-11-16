@@ -1347,28 +1347,87 @@ function tampilkanPesananKonfirmasi() {
 }
 
 
-function kirimOrder() {
+function ambilStatusKedaiJSONP() {
 
-    // PERIKSA STATUS KEDAI TERLEBIH DAHULU
-    fetch(URL_API + "?action=statusKedai", {
-        method: "GET",
-        cache: "no-store"
-    })
-    .then(function(response) {
+    return new Promise(function(resolve, reject) {
 
-        if (!response.ok) {
-            throw new Error("Tidak dapat membaca status kedai.");
+        const namaCallback =
+            "callbackStatusKedaiRH_" +
+            Date.now();
+
+        const script =
+            document.createElement("script");
+
+        let selesai = false;
+
+        function bersihkan() {
+
+            if (selesai) return;
+
+            selesai = true;
+
+            clearTimeout(timer);
+
+            delete window[namaCallback];
+
+            if (script.parentNode) {
+                script.parentNode.removeChild(script);
+            }
         }
 
-        return response.json();
-    })
+        const timer = setTimeout(function() {
+
+            bersihkan();
+
+            reject(
+                new Error("Waktu pemeriksaan status kedai habis.")
+            );
+
+        }, 10000);
+
+        window[namaCallback] = function(data) {
+
+            bersihkan();
+
+            resolve(data);
+        };
+
+        script.onerror = function() {
+
+            bersihkan();
+
+            reject(
+                new Error("Gagal membaca status kedai.")
+            );
+        };
+
+        script.src =
+            URL_API +
+            "?action=statusKedai&callback=" +
+            namaCallback +
+            "&t=" +
+            Date.now();
+
+        document.head.appendChild(script);
+
+    });
+}
+
+
+
+function kirimOrder() {
+
+    // PERIKSA STATUS KEDAI MELALUI JSONP
+    ambilStatusKedaiJSONP()
+
     .then(function(status) {
 
-        // JIKA KEDAI TUTUP, JANGAN KIRIM PESANAN
+        // JIKA KEDAI TUTUP
         if (
             status.status !== "success" ||
             status.kedaiAktif !== true
         ) {
+
             alert(
                 "MAAF, KEDAI SEDANG TUTUP.\n\n" +
                 "Pesanan belum dapat diterima."
@@ -1387,7 +1446,9 @@ function kirimOrder() {
             pesananLt1.concat(pesananLt2);
 
         if (daftarPesanan.length === 0) {
+
             alert("Silakan pilih minimal 1 menu.");
+
             return;
         }
 
@@ -1398,6 +1459,7 @@ function kirimOrder() {
         });
 
         let dataOrder = {
+
             nomorOrder: nomorOrder,
             nama: dataNama,
             meja: dataMeja,
@@ -1406,17 +1468,22 @@ function kirimOrder() {
             pesanan: daftarPesanan,
             total: total,
             statusOrder: "BARU"
+
         };
 
         // KIRIM PESANAN KE CORE
         return fetch(URL_API, {
+
             method: "POST",
             mode: "no-cors",
             body: JSON.stringify(dataOrder)
+
         })
+
         .then(function() {
 
             document.getElementById("menu").innerHTML = `
+
                 <div id="orderBerhasil">
 
                     <h2>📨 PERMINTAAN ORDER TERKIRIM</h2>
@@ -1432,23 +1499,28 @@ function kirimOrder() {
                     </p>
 
                     <p>
-                        Catatan: status penerimaan harus
-                        dipastikan melalui dashboard kasir.
+                        Penerimaan pesanan dipastikan
+                        melalui dashboard kasir.
                     </p>
 
                 </div>
+
             `;
+
         });
 
     })
+
     .catch(function(error) {
 
-        console.log("Gagal memeriksa atau mengirim order:", error);
+        console.log(
+            "Gagal memeriksa atau mengirim order:",
+            error
+        );
 
         alert(
             "TIDAK DAPAT MEMERIKSA STATUS KEDAI.\n\n" +
-            "Pesanan belum dapat dipastikan terkirim. " +
-            "Silakan coba kembali."
+            "Pesanan belum dikirim. Silakan coba kembali."
         );
 
     });
