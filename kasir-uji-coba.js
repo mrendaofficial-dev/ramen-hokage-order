@@ -568,28 +568,74 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
 let rincian = order.rincianPesanan;
 
 // Katalog harga berdasarkan file aplikasi pelanggan
+
 const katalogHarga = {
+
+    // =================================
+    // MENU BARU LANTAI 1 - MAKANAN
+    // =================================
+
+    "RAMEN BEEF KUAH KARI": 16000,
+    "RAMEN BEEF KUAH ORI": 16000,
+    "RAMEN SEAFOOD": 15000,
+    "RAMEN KATSU KUAH KARI": 13000,
+    "RAMEN HOKAGE KUAH ORI": 13000,
+    "CHICKEN D STEAK": 23000,
+    "MIE AYAM ORI": 10000,
+    "MIE AYAM BASO": 15000,
+    "BASO 100% DAGING SAPI": 13000,
+    "KENTANG GORENG": 10000,
+    "DIMSUM": 13000,
+    "BASO TAHU": 12000,
+    "ROTI KOPI/KEJU": 4000,
+    "NASI GORENG BEEF": 16000,
+    "NASI GORENG AYAM": 15000,
+    "RICE BOWL BEEF": 16000,
+    "CHICKEN KATSU": 17000,
+    "MIX PLATER": 12000,
+    "LAIN-LAIN": 1000,
+
+    // =================================
+    // MENU BARU LANTAI 1 - MINUMAN
+    // =================================
+
+    "ES TEH MANIS": 4000,
+    "TEH HANGAT MANIS": 3000,
+    "AIR MINERAL": 4000,
+    "LEMON TEA": 7000,
+    "ES MILKY MATCHA": 12000,
+    "ES KOPI CARAMEL MACHIATO": 12000,
+    "ES KOPI AMERICANO": 12000,
+    "ES KOPI BROWN SUGAR": 12000,
+    "ES KOPI BUTTERSCOTH": 13000,
+
+    // =================================
+    // MENU LAMA LANTAI 1
+    // UNTUK KOMPATIBILITAS STRUK LAMA
+    // =================================
+
     "Ramen Beef": 16000,
     "Ramen Katsu": 13000,
     "Mie Ayam": 10000,
-    "Mie Ayam Baso": 15000,
     "Baso Sapi 100%": 13000,
     "Chicken Double Steak": 20000,
     "Roti Kopi/Manis": 4000,
-    "Dimsum": 13000,
-    "Kentang Goreng": 10000,
     "Es Teh Manis/Hangat Manis": 4000,
     "Es Lemon Tea": 5000,
     "Teh Hangat Tawar": 2000,
-    "Air Mineral": 4000,
+
+    // =================================
+    // MENU LANTAI 2 - TIDAK DIUBAH
+    // =================================
+
     "Mie Gacoan Ori": 12000,
     "Mie Gacoan Pedas": 12000,
     "Baso Malang": 15000,
     "Mie Yamin": 15000,
-    "Es Teh Manis": 4000,
     "Es Teh Tawar/Hangat": 2000,
     "Infuse Water": 3000,
     "Black Kopi": 10000
+
 };
 
 // Jika rincian dari server kosong, baca format teks
