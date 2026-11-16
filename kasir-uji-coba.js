@@ -87,6 +87,118 @@ function statusPembayaran(order) {
 }
 
 
+// ==========================================
+// REKAP PENJUALAN HARIAN
+// ==========================================
+function pastikanPanelRekapPenjualan() {
+    let panel = document.getElementById("panelRekapPenjualan");
+    if (panel) return panel;
+
+    const daftar = document.getElementById("daftarPesanan");
+    if (!daftar || !daftar.parentNode) return null;
+
+    panel = document.createElement("section");
+    panel.id = "panelRekapPenjualan";
+    panel.style.cssText = "display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin:14px 0;padding:14px;border:1px solid #444;border-radius:12px;background:#171717;color:#fff;";
+
+    panel.innerHTML = `
+        <div style="grid-column:1/-1;font-weight:700;font-size:16px;">
+            💰 PENJUALAN HARI INI
+            <span id="rekapTanggal" style="font-size:12px;font-weight:400;opacity:.7;"></span>
+        </div>
+
+        <div style="grid-column:1/-1;padding:12px;border-radius:9px;background:#242424;">
+            <div style="font-size:12px;opacity:.75;">TOTAL PENJUALAN</div>
+            <div id="rekapTotal" style="font-size:25px;font-weight:800;color:#4ade80;">Memuat...</div>
+            <div id="rekapJumlah" style="font-size:12px;opacity:.75;">Menghitung transaksi...</div>
+        </div>
+
+        <div style="padding:11px;border-radius:9px;background:#242424;">
+            <div style="font-size:13px;">💵 TUNAI</div>
+            <div id="rekapTunai" style="font-size:19px;font-weight:700;">-</div>
+            <div id="rekapJumlahTunai" style="font-size:12px;opacity:.7;">-</div>
+        </div>
+
+        <div style="padding:11px;border-radius:9px;background:#242424;">
+            <div style="font-size:13px;">📱 QRIS</div>
+            <div id="rekapQris" style="font-size:19px;font-weight:700;">-</div>
+            <div id="rekapJumlahQris" style="font-size:12px;opacity:.7;">-</div>
+        </div>
+
+        <div id="rekapStatus" style="grid-column:1/-1;font-size:11px;opacity:.65;">
+            Menghubungkan ke server...
+        </div>
+    `;
+
+    daftar.parentNode.insertBefore(panel, daftar);
+    return panel;
+}
+
+
+async function ambilRekapPenjualanHarian() {
+    const panel = pastikanPanelRekapPenjualan();
+    if (!panel) return;
+
+    const status = document.getElementById("rekapStatus");
+
+    try {
+        const response = await fetch(
+            URL_API_KASIR + "?action=rekapPenjualanHarian&t=" + Date.now(),
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (data.status !== "success") {
+            throw new Error(data.pesan || "Rekap tidak berhasil dibaca.");
+        }
+
+        document.getElementById("rekapTanggal").textContent =
+            "· " + new Date(data.tanggal + "T00:00:00+07:00")
+            .toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+                timeZone: "Asia/Jakarta"
+            });
+
+        document.getElementById("rekapTotal").textContent =
+            rupiah(data.totalPenjualan);
+
+        document.getElementById("rekapJumlah").textContent =
+            Number(data.jumlahTransaksi || 0) + " transaksi lunas";
+
+        document.getElementById("rekapTunai").textContent =
+            rupiah(data.totalTunai);
+
+        document.getElementById("rekapJumlahTunai").textContent =
+            Number(data.jumlahTunai || 0) + " transaksi";
+
+        document.getElementById("rekapQris").textContent =
+            rupiah(data.totalQris);
+
+        document.getElementById("rekapJumlahQris").textContent =
+            Number(data.jumlahQris || 0) + " transaksi";
+
+        status.textContent =
+            "Rekap dihitung dari pembayaran LUNAS hari ini · diperbarui " +
+            new Date().toLocaleTimeString("id-ID");
+
+    } catch (error) {
+        console.error("Gagal mengambil rekap penjualan:", error);
+
+        status.textContent =
+            "⚠️ Rekap penjualan belum dapat diperbarui: " + error.message;
+    }
+}
+
 
 
 function tampilkanPesanan(pesanan) {
