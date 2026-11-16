@@ -977,6 +977,7 @@ try {
 
         daftarIDSebelumnya = idSekarang;
         tampilkanPesanan(pesanan);
+        await ambilRekapPenjualanHarian();
 
     
 } catch (error) {
