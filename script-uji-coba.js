@@ -318,10 +318,7 @@ requestAnimationFrame(function() {
 
 function resetPesanan() {
 
-    jumlahMenuLt1 = [
-        0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0
-    ];
+    jumlahMenuLt1 = Array(29).fill(0);
 
     jumlahMenuLt2 = [
         0, 0, 0,
@@ -1106,7 +1103,7 @@ function kurangRamenBeefLt2() {
 }
 
 
-let jumlahMenuLt1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+let jumlahMenuLt1 = Array(29).fill(0);
 
 
 function ubahJumlah(index, perubahan) {
