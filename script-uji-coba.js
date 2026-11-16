@@ -5,71 +5,48 @@ const URL_API =
 
 
 
+
 const menuLt1 = [
-    {
-        nama: "Ramen Beef",
-        harga: 16000
-    },
 
-    {
-        nama: "Ramen Katsu",
-        harga: 13000
-    },
+    // =========================
+    // MAKANAN LT. 1
+    // =========================
 
-    {
-        nama: "Mie Ayam",
-        harga: 10000
-    },
+    { nama: "RAMEN BEEF KUAH KARI", harga: 16000 },
+    { nama: "RAMEN BEEF KUAH ORI", harga: 16000 },
+    { nama: "RAMEN SEAFOOD", harga: 15000 },
+    { nama: "RAMEN KATSU KUAH KARI", harga: 13000 },
+    { nama: "RAMEN HOKAGE KUAH ORI", harga: 13000 },
+    { nama: "CHICKEN D STEAK", harga: 23000 },
+    { nama: "MIE AYAM ORI", harga: 10000 },
+    { nama: "MIE AYAM BASO", harga: 15000 },
+    { nama: "BASO 100% DAGING SAPI", harga: 13000 },
+    { nama: "KENTANG GORENG", harga: 10000 },
+    { nama: "DIMSUM", harga: 13000 },
+    { nama: "BASO TAHU", harga: 12000 },
+    { nama: "ROTI KOPI/KEJU", harga: 4000 },
+    { nama: "NASI GORENG BEEF", harga: 16000 },
+    { nama: "NASI GORENG AYAM", harga: 15000 },
+    { nama: "RICE BOWL BEEF", harga: 16000 },
+    { nama: "CHICKEN KATSU", harga: 17000 },
+    { nama: "MIX PLATER", harga: 12000 },
+    { nama: "LAIN-LAIN", harga: 1000 },
 
-    {
-        nama: "Mie Ayam Baso",
-        harga: 15000
-    },
+    // =========================
+    // MINUMAN LT. 1
+    // =========================
 
-    {
-        nama: "Baso Sapi 100%",
-        harga: 13000
-    },
+    { nama: "ES TEH MANIS", harga: 4000 },
+    { nama: "TEH HANGAT MANIS", harga: 3000 },
+    { nama: "AIR MINERAL", harga: 4000 },
+    { nama: "LEMON TEA", harga: 7000 },
+    { nama: "ES MILKY MATCHA", harga: 12000 },
+    { nama: "ES KOPI CARAMEL MACHIATO", harga: 12000 },
+    { nama: "ES KOPI AMERICANO", harga: 12000 },
+    { nama: "ES KOPI BROWN SUGAR", harga: 12000 },
+    { nama: "ES KOPI BUTTERSCOTH", harga: 13000 },
+    { nama: "LAIN-LAIN", harga: 1000 }
 
-    {
-    nama: "Chicken Double Steak",
-    harga: 20000
-    },
-
-    {
-        nama: "Roti Kopi/Manis",
-        harga: 4000
-    },
-
-    {
-        nama: "Dimsum",
-        harga: 13000
-    },
-
-    {
-        nama: "Kentang Goreng",
-        harga: 10000
-    },
-
-    {
-        nama: "Es Teh Manis/Hangat Manis",
-        harga: 4000
-    },
-
-    {
-        nama: "Es Lemon Tea",
-        harga: 5000
-    },
-
-    {
-        nama: "Teh Hangat Tawar",
-        harga: 2000
-    },
-
-    {
-        nama: "Air Mineral",
-        harga: 4000
-    }
 ];
 
 
