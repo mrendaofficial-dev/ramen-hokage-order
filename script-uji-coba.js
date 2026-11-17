@@ -116,6 +116,9 @@ let dataCatatan = "";
 let lantaiPelanggan = "";
 
 let modeOrder = "KUNCI_LANTAI";
+// STATUS KETERSEDIAAN MENU LT1
+let statusMenuPelanggan = {};
+let statusMenuPelangganSiap = false;
 
 // PENGATURAN LANTAI
 const LANTAI2_AKTIF = false;
@@ -1387,8 +1390,79 @@ function ambilStatusKedaiJSONP() {
     });
 }
 
+function ambilStatusMenuPelangganJSONP() {
 
+    return new Promise(function(resolve, reject) {
 
+        const namaCallback =
+            "callbackStatusMenuRH_" + Date.now();
+
+        const script = document.createElement("script");
+
+        let selesai = false;
+
+        function bersihkan() {
+            if (selesai) return;
+
+            selesai = true;
+            clearTimeout(timer);
+            delete window[namaCallback];
+
+            if (script.parentNode) {
+                script.parentNode.removeChild(script);
+            }
+        }
+
+        const timer = setTimeout(function() {
+            bersihkan();
+            reject(new Error("Waktu membaca status menu habis."));
+        }, 10000);
+
+        window[namaCallback] = function(data) {
+            bersihkan();
+
+            if (!data || data.status !== "success" ||
+                !Array.isArray(data.menu)) {
+                reject(new Error("Data status menu tidak valid."));
+                return;
+            }
+
+            resolve(data.menu);
+        };
+
+        script.onerror = function() {
+            bersihkan();
+            reject(new Error("Gagal membaca status menu."));
+        };
+
+        script.src =
+            URL_API +
+            "?action=statusMenu&callback=" +
+            namaCallback +
+            "&t=" + Date.now();
+
+        document.head.appendChild(script);
+    });
+}
+// MEMBUAT TOMBOL TAMBAH SESUAI STATUS MENU LT1
+function tombolTambahMenuLt1(index) {
+
+    const menu = menuLt1[index];
+
+    const tersedia =
+        statusMenuPelanggan[menu.nama] === "TERSEDIA";
+
+    return `
+        <button class="btn-tambah"
+            ${tersedia ? "" : "disabled"}
+            onclick="ubahJumlah(${index}, 1)">+</button>
+
+        ${tersedia
+            ? ""
+            : '<small class="status-menu-habis">HABIS</small>'
+        }
+    `;
+}
 function kirimOrder() {
 
     // PERIKSA STATUS KEDAI MELALUI JSONP
@@ -1516,6 +1590,39 @@ function pesanLagi() {
 }
 
 if (ambilIdentitasMejaQR()) {
-    ambilModeDariServer();
-}
 
+    document.getElementById("menu").innerHTML = `
+        <h2>⏳ Memuat menu Ramen Hokage...</h2>
+    `;
+
+    ambilStatusMenuPelangganJSONP()
+
+        .then(function(daftarMenu) {
+
+            statusMenuPelanggan = {};
+
+            daftarMenu.forEach(function(menu) {
+                statusMenuPelanggan[menu.nama] = menu.status;
+            });
+
+            statusMenuPelangganSiap = true;
+
+            console.log("Status menu berhasil dimuat:",
+                statusMenuPelanggan);
+
+            ambilModeDariServer();
+
+        })
+
+        .catch(function(error) {
+
+            console.error("Gagal membaca status menu:", error);
+
+            document.getElementById("menu").innerHTML = `
+                <h2>⚠️ MENU BELUM DAPAT DIMUAT</h2>
+                <p>Gagal membaca ketersediaan menu.</p>
+                <p>Silakan muat ulang halaman.</p>
+            `;
+
+        });
+}
