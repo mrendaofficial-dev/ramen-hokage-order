@@ -362,13 +362,14 @@ function tampilLantai1() {
 
                 <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
 
-                ${tombolTambahMenuLt1(index)}
+              <button class="btn-kurang"
+    onclick="ubahJumlah(${index}, -1)">−</button>
 
-                <span id="jumlah-${index}">
-                    ${jumlahMenuLt1[index]}
-                </span>
+<span id="jumlah-${index}">
+    ${jumlahMenuLt1[index]}
+</span>
 
-                ${tombolTambahMenuLt1(index)}
+${tombolTambahMenuLt1(index)}
             </div>
         `;
     }
