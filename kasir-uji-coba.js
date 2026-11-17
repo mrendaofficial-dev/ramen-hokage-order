@@ -563,7 +563,6 @@ async function cetakStrukKasirCleanter(nomorOrder, tombol) {
     try {
         
 
-
 // MEMBACA RINCIAN MENU
 let rincian = order.rincianPesanan;
 
