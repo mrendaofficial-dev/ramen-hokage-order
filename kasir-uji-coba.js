@@ -617,29 +617,6 @@ const katalogHargaAktif = {
 
 };
 
-// ==========================================
-// KATALOG HISTORIS
-// KHUSUS MEMBACA TRANSAKSI LAMA
-// ==========================================
-
-const katalogHargaLama = {
-    "Ramen Beef": 16000,
-    "Ramen Katsu": 13000,
-    "Mie Ayam": 10000,
-    "Baso Sapi 100%": 13000,
-    "Chicken Double Steak": 20000,
-    "Roti Kopi/Manis": 4000,
-    "Dimsum": 13000,
-    "Kentang Goreng": 10000,
-    "Es Teh Manis/Hangat Manis": 4000,
-    "Es Lemon Tea": 5000,
-    "Teh Hangat Tawar": 2000
-};
-        // Gabungkan katalog menu aktif dan historis.
-const semuaKatalog = {
-    ...katalogHargaLama,
-    ...katalogHargaAktif
-};
 
         if (!Array.isArray(rincian) || rincian.length === 0) {
     rincian = [];
@@ -662,7 +639,7 @@ const semuaKatalog = {
             const nama = cocok[1].trim();
             const jumlah = Number(cocok[2]);
 
-            const namaKatalog = Object.keys(semuaKatalog).find(
+            const namaKatalog = Object.keys(katalogHargaAktif).find(
                 function(item) {
                     return item.toLowerCase() === nama.toLowerCase();
                 }
@@ -672,7 +649,7 @@ const semuaKatalog = {
                 throw new Error("Harga menu tidak ditemukan: " + nama);
             }
 
-            const harga = semuaKatalog[namaKatalog];
+            const harga = katalogHargaAktif[namaKatalog];
 
             rincian.push({
                 nama: namaKatalog,
