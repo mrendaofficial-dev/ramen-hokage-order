@@ -368,8 +368,7 @@ function tampilLantai1() {
                     ${jumlahMenuLt1[index]}
                 </span>
 
-                <button class="btn-tambah"
-                    onclick="ubahJumlah(${index}, 1)">+</button>
+                ${tombolTambahMenuLt1(index)}
             </div>
         `;
     }
