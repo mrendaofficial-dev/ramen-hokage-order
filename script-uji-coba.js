@@ -16,7 +16,7 @@ const menuLt1 = [
     { nama: "RAMEN BEEF KUAH ORI", harga: 16000 },
     { nama: "RAMEN SEAFOOD", harga: 15000 },
     { nama: "RAMEN KATSU KUAH KARI", harga: 13000 },
-    { nama: "RAMEN HOKAGE KUAH ORI", harga: 13000 },
+    { nama: "RAMEN KATSU KUAH ORI", harga: 13000 },
     { nama: "CHICKEN D STEAK", harga: 23000 },
     { nama: "MIE AYAM ORI", harga: 10000 },
     { nama: "MIE AYAM BASO", harga: 15000 },
