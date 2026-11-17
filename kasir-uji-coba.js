@@ -1498,3 +1498,331 @@ sessionStorage.removeItem(KUNCI_TOKEN_KASIR);
 
 // Periksa status kedai saat dashboard dibuka.
 cekStatusAwalKedai();
+
+// ==========================================
+// PANEL PENGATURAN KETERSEDIAAN MENU - LT1
+// ==========================================
+
+let daftarStatusMenuDashboard = [];
+let prosesUbahStatusMenu = false;
+let nomorCallbackStatusMenu = 0;
+
+
+// Membaca status menu melalui JSONP
+function bacaStatusMenuDashboard() {
+    return new Promise(function(resolve, reject) {
+        const callback =
+            "callbackStatusMenuHokage" + (++nomorCallbackStatusMenu);
+
+        const script = document.createElement("script");
+
+        const batasWaktu = setTimeout(function() {
+            delete window[callback];
+            script.remove();
+            reject(new Error("Waktu membaca status menu habis."));
+        }, 15000);
+
+        window[callback] = function(hasil) {
+            clearTimeout(batasWaktu);
+            delete window[callback];
+            script.remove();
+
+            if (
+                !hasil ||
+                hasil.status !== "success" ||
+                !Array.isArray(hasil.menu)
+            ) {
+                reject(new Error("Data status menu tidak valid."));
+                return;
+            }
+
+            resolve(hasil.menu);
+        };
+
+        script.onerror = function() {
+            clearTimeout(batasWaktu);
+            delete window[callback];
+            script.remove();
+            reject(new Error("Gagal menghubungi server status menu."));
+        };
+
+        script.src =
+            URL_API_KASIR +
+            "?action=statusMenu&callback=" +
+            callback +
+            "&t=" + Date.now();
+
+        document.body.appendChild(script);
+    });
+}
+
+
+// Membuat panel pengaturan menu
+function pastikanPanelStatusMenu() {
+    let panel = document.getElementById("panelStatusMenu");
+
+    if (panel) return panel;
+
+    const daftar = document.getElementById("daftarPesanan");
+
+    if (!daftar || !daftar.parentNode) return null;
+
+    panel = document.createElement("section");
+    panel.id = "panelStatusMenu";
+
+    panel.style.cssText = `
+        margin:14px 0;
+        padding:14px;
+        border:1px solid #555;
+        border-radius:12px;
+        background:#171717;
+        color:white;
+    `;
+
+    panel.innerHTML = `
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:10px;
+        ">
+            <strong style="font-size:16px;">
+                🍜 KETERSEDIAAN MENU LT1
+            </strong>
+
+            <button
+                type="button"
+                id="btnRefreshStatusMenu"
+                style="padding:8px 12px;">
+                🔄 MUAT ULANG
+            </button>
+        </div>
+
+        <p id="statusInfoMenu"
+            style="font-size:12px;opacity:.75;">
+            Menghubungkan ke server...
+        </p>
+
+        <div id="daftarStatusMenu"
+            style="
+                display:grid;
+                grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+                gap:8px;
+            ">
+        </div>
+    `;
+
+    daftar.parentNode.insertBefore(panel, daftar);
+
+    document.getElementById("btnRefreshStatusMenu")
+        .addEventListener("click", ambilStatusMenuDashboard);
+
+    return panel;
+}
+
+
+// Menampilkan daftar menu dan statusnya
+function tampilkanStatusMenuDashboard() {
+    const daftar = document.getElementById("daftarStatusMenu");
+
+    if (!daftar) return;
+
+    daftar.innerHTML = daftarStatusMenuDashboard.map(function(menu) {
+        const habis = menu.status === "HABIS";
+
+        const warna = habis ? "#7f1d1d" : "#14532d";
+        const tulisan = habis ? "🔴 HABIS" : "🟢 TERSEDIA";
+        const tujuan = habis ? "TERSEDIA" : "HABIS";
+
+        return `
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:8px;
+                padding:10px;
+                border-radius:8px;
+                background:#242424;
+                border:1px solid #444;
+            ">
+                <span style="
+                    font-size:12px;
+                    font-weight:600;
+                    flex:1;
+                ">
+                    ${aman(menu.nama)}
+                </span>
+
+                <button
+                    type="button"
+                    data-nama-menu="${aman(menu.nama)}"
+                    data-status-baru="${tujuan}"
+                    style="
+                        padding:8px;
+                        border:0;
+                        border-radius:6px;
+                        background:${warna};
+                        color:white;
+                        font-size:11px;
+                        font-weight:bold;
+                        cursor:pointer;
+                        white-space:nowrap;
+                    ">
+                    ${tulisan}
+                </button>
+            </div>
+        `;
+    }).join("");
+
+    daftar.querySelectorAll("button[data-nama-menu]")
+        .forEach(function(tombol) {
+            tombol.addEventListener("click", function() {
+                ubahStatusMenuDashboard(
+                    tombol.dataset.namaMenu,
+                    tombol.dataset.statusBaru,
+                    tombol
+                );
+            });
+        });
+}
+
+
+// Mengambil daftar status dari CORE
+async function ambilStatusMenuDashboard() {
+    const panel = pastikanPanelStatusMenu();
+
+    if (!panel) return;
+
+    const info = document.getElementById("statusInfoMenu");
+    const tombolRefresh = document.getElementById("btnRefreshStatusMenu");
+
+    if (tombolRefresh) tombolRefresh.disabled = true;
+
+    info.textContent = "Mengambil data menu...";
+
+    try {
+        daftarStatusMenuDashboard =
+            await bacaStatusMenuDashboard();
+
+        tampilkanStatusMenuDashboard();
+
+        info.textContent =
+            "🟢 " + daftarStatusMenuDashboard.length +
+            " menu LT1 · Diperbarui " +
+            new Date().toLocaleTimeString("id-ID");
+
+    } catch (error) {
+        console.error("Status menu gagal dibaca:", error);
+        info.textContent = "⚠️ " + error.message;
+
+    } finally {
+        if (tombolRefresh) tombolRefresh.disabled = false;
+    }
+}
+
+
+// Mengubah status menu melalui BACKUP CORE
+async function ubahStatusMenuDashboard(namaMenu, statusBaru, tombol) {
+
+    if (prosesUbahStatusMenu) return;
+
+    const token = localStorage.getItem("ramenHokageTokenKasir");
+
+    if (!token) {
+        alert("Token sesi kasir tidak ditemukan. Periksa sesi kasir.");
+        return;
+    }
+
+    const namaPetugas = prompt("Nama petugas kasir:", "Kasir");
+
+    if (namaPetugas === null || !namaPetugas.trim()) return;
+
+    const yakin = confirm(
+        "Ubah status menu:\n\n" +
+        namaMenu + "\n\n" +
+        "Menjadi: " + statusBaru + "?"
+    );
+
+    if (!yakin) return;
+
+    prosesUbahStatusMenu = true;
+
+    tombol.disabled = true;
+    tombol.textContent = "MENYIMPAN...";
+
+    document.getElementById("statusInfoMenu").textContent =
+        "Menyimpan perubahan ke server...";
+
+    try {
+        await fetch(URL_API_KASIR, {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "text/plain;charset=UTF-8"
+            },
+            body: JSON.stringify({
+                action: "ubahStatusMenu",
+                tokenKasir: token,
+                namaMenu: namaMenu,
+                status: statusBaru,
+                petugas: namaPetugas.trim()
+            })
+        });
+
+        // POST no-cors tidak dapat membaca respons server.
+        // Karena itu, verifikasi dilakukan dengan membaca ulang status.
+        let berhasil = false;
+
+        for (let i = 0; i < 8; i++) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const hasil = await bacaStatusMenuDashboard();
+
+            const menuTerbaru = hasil.find(function(menu) {
+                return menu.nama === namaMenu;
+            });
+
+            if (menuTerbaru && menuTerbaru.status === statusBaru) {
+                daftarStatusMenuDashboard = hasil;
+                berhasil = true;
+                break;
+            }
+        }
+
+        if (!berhasil) {
+            throw new Error(
+                "Perubahan belum terverifikasi. Periksa Google Sheets."
+            );
+        }
+
+        tampilkanStatusMenuDashboard();
+
+        document.getElementById("statusInfoMenu").textContent =
+            "🟢 Status " + namaMenu +
+            " berhasil diubah menjadi " + statusBaru;
+
+        alert(
+            "PERUBAHAN BERHASIL!\n\n" +
+            namaMenu + "\n" +
+            "Status: " + statusBaru
+        );
+
+    } catch (error) {
+        console.error("Perubahan status menu gagal:", error);
+
+        alert(
+            "STATUS MENU BELUM DAPAT DIPASTIKAN.\n\n" +
+            error.message
+        );
+
+        await ambilStatusMenuDashboard();
+
+    } finally {
+        prosesUbahStatusMenu = false;
+    }
+}
+
+
+// Jalankan panel saat dashboard dibuka
+ambilStatusMenuDashboard();
