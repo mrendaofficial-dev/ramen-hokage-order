@@ -1505,6 +1505,64 @@ function perbaruiTampilanStatusMenu() {
 
 }
 
+let timerPantauStatusMenu = null;
+let sedangMemeriksaStatusMenu = false;
+
+// PEMBARUAN STATUS MENU OTOMATIS
+function mulaiPantauStatusMenuOtomatis() {
+
+    if (timerPantauStatusMenu !== null) {
+        clearInterval(timerPantauStatusMenu);
+    }
+
+    timerPantauStatusMenu = setInterval(function() {
+
+        if (sedangMemeriksaStatusMenu) {
+            return;
+        }
+
+        sedangMemeriksaStatusMenu = true;
+
+        ambilStatusMenuPelangganJSONP()
+
+            .then(function(daftarMenu) {
+
+                const statusTerbaru = {};
+
+                daftarMenu.forEach(function(menu) {
+                    statusTerbaru[menu.nama] = menu.status;
+                });
+
+                statusMenuPelanggan = statusTerbaru;
+                statusMenuPelangganSiap = true;
+
+                perbaruiTampilanStatusMenu();
+
+                console.log(
+                    "Status menu berhasil diperbarui otomatis:",
+                    statusMenuPelanggan
+                );
+
+            })
+
+            .catch(function(error) {
+
+                console.log(
+                    "Gagal memperbarui status menu otomatis:",
+                    error
+                );
+
+            })
+
+            .finally(function() {
+                sedangMemeriksaStatusMenu = false;
+            });
+
+    }, 10000);
+
+}
+
+
 function kirimOrder() {
 
     // PERIKSA STATUS KEDAI MELALUI JSONP
@@ -1653,6 +1711,7 @@ if (ambilIdentitasMejaQR()) {
                 statusMenuPelanggan);
 
             ambilModeDariServer();
+            mulaiPantauStatusMenuOtomatis();
 
         })
 
