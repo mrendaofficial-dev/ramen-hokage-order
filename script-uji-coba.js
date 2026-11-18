@@ -1452,6 +1452,7 @@ function ambilStatusMenuPelangganJSONP() {
         document.head.appendChild(script);
     });
 }
+
 // MEMBUAT TOMBOL TAMBAH SESUAI STATUS MENU LT1
 function tombolTambahMenuLt1(index) {
 
@@ -1461,16 +1462,49 @@ function tombolTambahMenuLt1(index) {
         statusMenuPelanggan[menu.nama] === "TERSEDIA";
 
     return `
-        <button class="btn-tambah"
+        <button
+            id="tambah-menu-${index}"
+            class="btn-tambah"
             ${tersedia ? "" : "disabled"}
-            onclick="ubahJumlah(${index}, 1)">+</button>
+            onclick="ubahJumlah(${index}, 1)">
+            +
+        </button>
 
-        ${tersedia
-            ? ""
-            : '<small class="status-menu-habis">HABIS</small>'
-        }
+        <small
+            id="status-habis-${index}"
+            class="status-menu-habis"
+            style="display:${tersedia ? "none" : "inline"}">
+            HABIS
+        </small>
     `;
 }
+
+function perbaruiTampilanStatusMenu() {
+
+    menuLt1.forEach(function(menu, index) {
+
+        const tersedia =
+            statusMenuPelanggan[menu.nama] === "TERSEDIA";
+
+        const tombolTambah =
+            document.getElementById("tambah-menu-" + index);
+
+        const labelHabis =
+            document.getElementById("status-habis-" + index);
+
+        if (tombolTambah) {
+            tombolTambah.disabled = !tersedia;
+        }
+
+        if (labelHabis) {
+            labelHabis.style.display =
+                tersedia ? "none" : "inline";
+        }
+
+    });
+
+}
+
 function kirimOrder() {
 
     // PERIKSA STATUS KEDAI MELALUI JSONP
