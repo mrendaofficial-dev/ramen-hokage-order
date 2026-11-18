@@ -1650,127 +1650,143 @@ function pantauStatusOrder(nomorOrder, percobaan) {
 }
 
 
+
 function kirimOrder() {
 
     // PERIKSA STATUS KEDAI MELALUI JSONP
     ambilStatusKedaiJSONP()
 
-    .then(function(status) {
+        .then(function(status) {
 
-        // JIKA KEDAI TUTUP
-        if (
-            status.status !== "success" ||
-            status.kedaiAktif !== true
-        ) {
+            // JIKA KEDAI TUTUP
+            if (
+                status.status !== "success" ||
+                status.kedaiAktif !== true
+            ) {
 
-            alert(
-                "MAAF, KEDAI SEDANG TUTUP.\n\n" +
-                "Pesanan belum dapat diterima."
-            );
+                alert(
+                    "MAAF, KEDAI SEDANG TUTUP.\n\n" +
+                    "Pesanan belum dapat diterima."
+                );
 
-            return;
-        }
+                return;
+            }
 
-        // SUSUN DATA PESANAN
-        let nomorOrder = "RH-" + Date.now();
+            // SUSUN DATA PESANAN
+            let nomorOrder = "RH-" + Date.now();
 
-        let pesananLt1 = ambilPesananLt1();
-        let pesananLt2 = ambilPesananLt2();
+            let pesananLt1 = ambilPesananLt1();
+            let pesananLt2 = ambilPesananLt2();
 
-        let daftarPesanan =
-            pesananLt1.concat(pesananLt2);
+            let daftarPesanan =
+                pesananLt1.concat(pesananLt2);
 
-        if (daftarPesanan.length === 0) {
+            if (daftarPesanan.length === 0) {
+                alert("Silakan pilih minimal 1 menu.");
+                return;
+            }
 
-            alert("Silakan pilih minimal 1 menu.");
+            let total = 0;
 
-            return;
-        }
+            daftarPesanan.forEach(function(menu) {
+                total += menu.subtotal;
+            });
 
-        let total = 0;
+            let dataOrder = {
+                nomorOrder: nomorOrder,
+                nama: dataNama,
+                meja: dataMeja,
+                lantaiPelanggan: lantaiPelanggan,
+                catatan: dataCatatan,
+                pesanan: daftarPesanan,
+                total: total,
+                statusOrder: "BARU"
+            };
 
-        daftarPesanan.forEach(function(menu) {
-            total += menu.subtotal;
-        });
+            // KIRIM PESANAN KE CORE
+            return fetch(URL_API, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify(dataOrder)
+            })
 
-        let dataOrder = {
+                .then(function() {
 
-            nomorOrder: nomorOrder,
-            nama: dataNama,
-            meja: dataMeja,
-            lantaiPelanggan: lantaiPelanggan,
-            catatan: dataCatatan,
-            pesanan: daftarPesanan,
-            total: total,
-            statusOrder: "BARU"
+                    // TAMPILKAN PROSES PEMERIKSAAN
+                    document.getElementById("menu").innerHTML = `
+                        <div id="orderBerhasil">
+                            <h2>⏳ MEMERIKSA PESANAN...</h2>
+                            <p>Mohon tunggu, kami sedang memastikan pesanan diterima.</p>
+                            <p>Nomor Order: <strong>${nomorOrder}</strong></p>
+                        </div>
+                    `;
 
-        };
+                    // BACA STATUS DARI LOG_ORDER
+                    return pantauStatusOrder(nomorOrder);
 
-        // KIRIM PESANAN KE CORE
-        return fetch(URL_API, {
+                })
 
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify(dataOrder)
+                .then(function(hasil) {
+
+                    if (hasil.statusOrder === "DITERIMA") {
+
+                        document.getElementById("menu").innerHTML = `
+                            <div id="orderBerhasil">
+                                <h2>✅ PESANAN DITERIMA</h2>
+                                <p>Nomor Order: <strong>${nomorOrder}</strong></p>
+                                <p>${hasil.pesan}</p>
+                                <p>Terima kasih kawan! 😊</p>
+                            </div>
+                        `;
+
+                    } else if (hasil.statusOrder === "DITOLAK") {
+
+                        document.getElementById("menu").innerHTML = `
+                            <div id="orderBerhasil">
+                                <h2>⚠️ PESANAN BELUM DITERIMA</h2>
+                                <p>Nomor Order: <strong>${nomorOrder}</strong></p>
+                                <p>${hasil.pesan}</p>
+                                <p>Silakan kembali ke menu dan periksa pesanan Anda.</p>
+                            </div>
+                        `;
+
+                    }
+
+                })
+
+                .catch(function(error) {
+
+                    console.log(
+                        "Gagal memeriksa atau mengirim order:",
+                        error
+                    );
+
+                    document.getElementById("menu").innerHTML = `
+                        <div id="orderBerhasil">
+                            <h2>⏳ STATUS PESANAN BELUM DAPAT DIPASTIKAN</h2>
+                            <p>Nomor Order: <strong>${nomorOrder}</strong></p>
+                            <p>Pesanan mungkin sudah diterima server, tetapi statusnya belum berhasil dibaca.</p>
+                            <p>Jangan kirim ulang dahulu. Silakan minta kasir memeriksa nomor order ini.</p>
+                        </div>
+                    `;
+
+                });
 
         })
 
-        
-.then(function() {
+        .catch(function(error) {
 
-    document.getElementById("menu").innerHTML = `
-        <div id="orderBerhasil">
-            <h2>⏳ MEMERIKSA PESANAN...</h2>
-            <p>Mohon tunggu, kami sedang memastikan pesanan diterima.</p>
-            <p>Nomor Order: <strong>${nomorOrder}</strong></p>
-        </div>
-    `;
+            console.log(
+                "Gagal memeriksa status kedai:",
+                error
+            );
 
-    return pantauStatusOrder(nomorOrder);
+            alert(
+                "Tidak dapat memeriksa status kedai. " +
+                "Silakan muat ulang halaman."
+            );
 
-})
-
-.then(function(hasil) {
-
-    if (hasil.statusOrder === "DITERIMA") {
-
-        document.getElementById("menu").innerHTML = `
-            <div id="orderBerhasil">
-                <h2>✅ PESANAN DITERIMA</h2>
-                <p>Nomor Order: <strong>${nomorOrder}</strong></p>
-                <p>${hasil.pesan}</p>
-                <p>Terima kasih kawan! 😊</p>
-            </div>
-        `;
-
-    } else if (hasil.statusOrder === "DITOLAK") {
-
-        document.getElementById("menu").innerHTML = `
-            <div id="orderBerhasil">
-                <h2>⚠️ PESANAN BELUM DITERIMA</h2>
-                <p>Nomor Order: <strong>${nomorOrder}</strong></p>
-                <p>${hasil.pesan}</p>
-                <p>Silakan kembali ke menu dan periksa pesanan Anda.</p>
-            </div>
-        `;
-
-    }
-
-})
-
-    .catch(function(error) {
-
-        console.log(
-            "Gagal memeriksa atau mengirim order:",
-            error
-        );
-
-        alert(
-            "TIDAK DAPAT MEMERIKSA STATUS KEDAI.\n\n" +
-            "Pesanan belum dikirim. Silakan coba kembali."
-        );
-
-    });
+        });
 
 }
 
