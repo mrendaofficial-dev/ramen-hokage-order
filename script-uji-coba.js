@@ -1135,16 +1135,7 @@ function ubahJumlah(index, perubahan) {
     hitungTotal();
     tampilkanKeranjang();
 }
-    document.getElementById("jumlah-" + index).innerHTML =
-        jumlahMenuLt1[index];
-
-    hitungTotal();
-
-
-tampilkanKeranjang();
-}
-
-
+       
 function hitungTotal() {
 
     let total = 0;
