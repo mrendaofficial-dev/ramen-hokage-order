@@ -398,15 +398,15 @@ ${tombolTambahMenuLt1(index)}
                 <p>Rp${menu.harga.toLocaleString("id-ID")}</p>
 
                 <button class="btn-kurang"
-                    onclick="ubahJumlah(${index}, -1)">−</button>
+    onclick="ubahJumlah(${index}, -1)">−</button>
 
-                <span id="jumlah-${index}">
-                    ${jumlahMenuLt1[index]}
-                </span>
+<span id="jumlah-${index}">
+    ${jumlahMenuLt1[index]}
+</span>
 
-                <button class="btn-tambah"
-                    onclick="ubahJumlah(${index}, 1)">+</button>
-            </div>
+${tombolTambahMenuLt1(index)}
+
+</div>
         `;
     }
 
@@ -1110,13 +1110,31 @@ let jumlahMenuLt1 = Array(29).fill(0);
 
 function ubahJumlah(index, perubahan) {
 
+    // CEGAH PENAMBAHAN MENU YANG BELUM TERSEDIA
+    if (
+        perubahan > 0 &&
+        (
+            !statusMenuPelangganSiap ||
+            statusMenuPelanggan[menuLt1[index].nama] !== "TERSEDIA"
+        )
+    ) {
+        alert("Maaf, menu " + menuLt1[index].nama +
+              " belum tersedia atau sedang habis.");
+        return;
+    }
+
     jumlahMenuLt1[index] = jumlahMenuLt1[index] + perubahan;
 
     if (jumlahMenuLt1[index] < 0) {
-
         jumlahMenuLt1[index] = 0;
     }
 
+    document.getElementById("jumlah-" + index).innerHTML =
+        jumlahMenuLt1[index];
+
+    hitungTotal();
+    tampilkanKeranjang();
+}
     document.getElementById("jumlah-" + index).innerHTML =
         jumlahMenuLt1[index];
 
