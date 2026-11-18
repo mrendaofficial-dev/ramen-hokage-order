@@ -1562,6 +1562,94 @@ function mulaiPantauStatusMenuOtomatis() {
 
 }
 
+function cekStatusOrderJSONP(nomorOrder) {
+
+    return new Promise(function(resolve, reject) {
+
+        const callbackName =
+            "callbackStatusOrder_" + Date.now();
+
+        const script = document.createElement("script");
+
+        const timeout = setTimeout(function() {
+            bersihkan();
+            reject(new Error("Waktu pemeriksaan status habis."));
+        }, 10000);
+
+        function bersihkan() {
+            clearTimeout(timeout);
+            delete window[callbackName];
+
+            if (script.parentNode) {
+                script.parentNode.removeChild(script);
+            }
+        }
+
+        window[callbackName] = function(data) {
+            bersihkan();
+            resolve(data);
+        };
+
+        script.onerror = function() {
+            bersihkan();
+            reject(new Error("Gagal membaca status order."));
+        };
+
+        script.src =
+            URL_API +
+            "?action=cekStatusOrder" +
+            "&nomorOrder=" + encodeURIComponent(nomorOrder) +
+            "&callback=" + callbackName;
+
+        document.body.appendChild(script);
+
+    });
+
+}
+
+
+function pantauStatusOrder(nomorOrder, percobaan) {
+
+    percobaan = percobaan || 0;
+
+    return cekStatusOrderJSONP(nomorOrder)
+
+        .then(function(data) {
+
+            if (data.status !== "success") {
+                throw new Error(data.pesan || "Status tidak dapat dibaca.");
+            }
+
+            const status = String(
+                data.statusOrder || ""
+            ).toUpperCase();
+
+            if (status === "DITERIMA") {
+                return data;
+            }
+
+            if (status === "DITOLAK") {
+                return data;
+            }
+
+            if (percobaan >= 20) {
+                throw new Error("Status order belum dapat dipastikan.");
+            }
+
+            return new Promise(function(resolve) {
+                setTimeout(resolve, 1000);
+            }).then(function() {
+                return pantauStatusOrder(
+                    nomorOrder,
+                    percobaan + 1
+                );
+            });
+
+        });
+
+}
+
+
 function kirimOrder() {
 
     // PERIKSA STATUS KEDAI MELALUI JSONP
@@ -1627,37 +1715,48 @@ function kirimOrder() {
 
         })
 
-        .then(function() {
+        
+.then(function() {
 
-            
-document.getElementById("menu").innerHTML = `
+    document.getElementById("menu").innerHTML = `
+        <div id="orderBerhasil">
+            <h2>⏳ MEMERIKSA PESANAN...</h2>
+            <p>Mohon tunggu, kami sedang memastikan pesanan diterima.</p>
+            <p>Nomor Order: <strong>${nomorOrder}</strong></p>
+        </div>
+    `;
 
-    <div id="orderBerhasil">
+    return pantauStatusOrder(nomorOrder);
 
-        <h2>📨 PERMINTAAN ORDER TERKIRIM</h2>
+})
 
-        <p>
-            Nomor Order:
-            <strong>${nomorOrder}</strong>
-        </p>
+.then(function(hasil) {
 
-        <p>
-            Permintaan sudah dikirim.
-            Orderan akan dikerjakan sesuai dengan nomor antrian.
-        </p>
+    if (hasil.statusOrder === "DITERIMA") {
 
-        <p>
-            Terima kasih kawan,
-            Semoga harimu menyenangkan! 😊
-        </p>
+        document.getElementById("menu").innerHTML = `
+            <div id="orderBerhasil">
+                <h2>✅ PESANAN DITERIMA</h2>
+                <p>Nomor Order: <strong>${nomorOrder}</strong></p>
+                <p>${hasil.pesan}</p>
+                <p>Terima kasih kawan! 😊</p>
+            </div>
+        `;
 
-    </div>
+    } else if (hasil.statusOrder === "DITOLAK") {
 
-`;
+        document.getElementById("menu").innerHTML = `
+            <div id="orderBerhasil">
+                <h2>⚠️ PESANAN BELUM DITERIMA</h2>
+                <p>Nomor Order: <strong>${nomorOrder}</strong></p>
+                <p>${hasil.pesan}</p>
+                <p>Silakan kembali ke menu dan periksa pesanan Anda.</p>
+            </div>
+        `;
 
-        });
+    }
 
-    })
+})
 
     .catch(function(error) {
 
