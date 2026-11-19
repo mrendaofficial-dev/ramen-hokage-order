@@ -1769,7 +1769,7 @@ function kirimOrder() {
 }
 })
 
-                .catch(function(error) {
+      .catch(function(error) {
 
                     console.log(
                         "Gagal memeriksa atau mengirim order:",
