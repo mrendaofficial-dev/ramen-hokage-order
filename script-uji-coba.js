@@ -1178,6 +1178,7 @@ function tampilkanKeranjang() {
 }
 
 
+
 function kembaliKeMenu() {
 
     let mode = cekModeOrder();
@@ -1202,6 +1203,16 @@ function kembaliKeMenu() {
 
         }
     }
+
+    // PULIHKAN DATA PELANGGAN
+    const namaInput = document.getElementById("namaPelanggan");
+    const mejaInput = document.getElementById("nomorMeja");
+    const catatanInput = document.getElementById("catatanPesanan");
+
+    if (namaInput) namaInput.value = dataNama;
+    if (mejaInput) mejaInput.value = dataMeja;
+    if (catatanInput) catatanInput.value = dataCatatan;
+
 }
 
 
