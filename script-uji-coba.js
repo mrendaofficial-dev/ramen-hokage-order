@@ -1750,20 +1750,24 @@ function kirimOrder() {
                             </div>
                         `;
 
-                    } else if (hasil.statusOrder === "DITOLAK") {
+                    
+} else if (hasil.statusOrder === "DITOLAK") {
 
-                        document.getElementById("menu").innerHTML = `
-                            <div id="orderBerhasil">
-                                <h2>⚠️ PESANAN BELUM DITERIMA</h2>
-                                <p>Nomor Order: <strong>${nomorOrder}</strong></p>
-                                <p>${hasil.pesan}</p>
-                                <p>Silakan kembali ke menu dan periksa pesanan Anda.</p>
-                            </div>
-                        `;
+    document.getElementById("menu").innerHTML = `
+        <div id="orderBerhasil">
+            <h2>⚠️ PESANAN BELUM DITERIMA</h2>
+            <p>Nomor Order: <strong>${nomorOrder}</strong></p>
+            <p>${hasil.pesan}</p>
+            <p>Silakan pilih menu pengganti atau hapus menu yang habis.</p>
 
-                    }
+            <button onclick="kembaliKeMenu()">
+                ← KEMBALI PILIH MENU
+            </button>
+        </div>
+    `;
 
-                })
+}
+})
 
                 .catch(function(error) {
 
